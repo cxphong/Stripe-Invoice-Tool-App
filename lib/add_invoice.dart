@@ -1,0 +1,300 @@
+import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:stripe_invoice/customer.dart';
+import 'package:stripe_invoice/constant.dart';
+
+class Item {
+  String name;
+  double amount;
+  int quantity;
+
+  Item({
+    required this.name,
+    required this.amount,
+    required this.quantity,
+  });
+}
+
+class AddInvoiceScreen extends StatefulWidget {
+  const AddInvoiceScreen({Key? key}) : super(key: key);
+
+  @override
+  _AddInvoiceScreenState createState() => _AddInvoiceScreenState();
+}
+
+class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
+  Customer? selectedCustomer;
+  String currency = 'USD';
+  final List<String> dueDaysOptions = [
+    'Today',
+    'Tomorrow',
+    '7 Days',
+    '14 Days',
+    '30 Days',
+    '45 Days',
+    '60 Days',
+    '90 Days'
+  ];
+  String? selectedDueDay;
+  final List<Item> items = [];
+  final TextEditingController memoController = TextEditingController();
+
+  void addItem() {
+    setState(() {
+      items.add(Item(name: '', amount: 0.0, quantity: 1));
+    });
+  }
+
+  void removeItem(int index) {
+    setState(() {
+      items.removeAt(index);
+    });
+  }
+
+
+  Future<void> createInvoice() async {
+    if (selectedCustomer == null || selectedDueDay == null || items.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please complete all required fields.')),
+      );
+      return;
+    }
+
+    final dueDaysMap = {
+      'Today': 0,
+      'Tomorrow': 1,
+      '7 Days': 7,
+      '14 Days': 14,
+      '30 Days': 30,
+      '45 Days': 45,
+      '60 Days': 60,
+      '90 Days': 90,
+    };
+
+    final dueDate = DateTime.now().add(Duration(days: dueDaysMap[selectedDueDay]!));
+
+    // Step 1: Create Invoice
+    final invoiceResponse = await http.post(
+      Uri.https('api.stripe.com', '/v1/invoices'),
+      headers: {
+        'Authorization': 'Bearer ${stripe_secret_key}',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: {
+        'customer': selectedCustomer!.id,
+        'description': memoController.text,
+        'currency': currency,
+        'due_date': (dueDate.millisecondsSinceEpoch / 1000).round().toString(), // Unix timestamp in seconds
+        'collection_method': 'send_invoice',
+      },
+    );
+
+    if (invoiceResponse.statusCode != 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create invoice: ${invoiceResponse.statusCode}')),
+      );
+      return;
+    }
+
+    final invoiceData = jsonDecode(invoiceResponse.body);
+    final String invoiceId = invoiceData['id'];
+
+    // Step 2: Create Invoice Items
+    for (var item in items) {
+      final response = await http.post(
+        Uri.https('api.stripe.com', '/v1/invoiceitems'),
+        headers: {
+          'Authorization': 'Bearer ${stripe_secret_key}',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'customer': selectedCustomer!.id,
+          'unit_amount': (item.amount * 100).toInt().toString(), // Amount in cents
+          'currency': currency,
+          'description': item.name,
+          'quantity': item.quantity.toString(),
+          'invoice': invoiceId,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        print(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create invoice item: ${response.statusCode}')),
+        );
+        return;
+      }
+    }
+
+    // Step 3: Finalize Invoice
+    final finalizeResponse = await http.post(
+      Uri.https('api.stripe.com', '/v1/invoices/$invoiceId/finalize'),
+      headers: {
+        'Authorization': 'Bearer ${stripe_secret_key}',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    );
+
+    if (finalizeResponse.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invoice created and finalized successfully.')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to finalize invoice: ${finalizeResponse.statusCode}')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Invoice'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ListTile(
+                title: const Text('Select Customer'),
+                subtitle: Text(selectedCustomer != null
+                    ? selectedCustomer!.name
+                    : 'No customer selected'),
+                onTap: () async {
+                  final result = await Navigator.push<Customer>(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CustomerScreen(isFromAddInvoice: true)),
+                  );
+                  if (result != null) {
+                    setState(() {
+                      selectedCustomer = result;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16.0),
+              DropdownButtonFormField<String>(
+                value: currency,
+                decoration: const InputDecoration(labelText: 'Currency'),
+                items: <String>['USD', 'EUR', 'GBP'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    currency = newValue!;
+                  });
+                },
+              ),
+              const SizedBox(height: 16.0),
+              const Text(
+                'Item Details',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              ...items.map((item) {
+                int index = items.indexOf(item);
+                return Column(
+                  key: ValueKey(item),
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Item Name',
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          item.name = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8.0),
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Amount in $currency',
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                      ),
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (value) {
+                        setState(() {
+                          item.amount = double.tryParse(value) ?? 0.0;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8.0),
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Quantity',
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        setState(() {
+                          item.quantity = int.tryParse(value) ?? 1;
+                        });
+                      },
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => removeItem(index),
+                      ),
+                    ),
+                    const Divider(color: Colors.grey),
+                  ],
+                );
+              }).toList(),
+              TextButton.icon(
+                onPressed: addItem,
+                icon: const Icon(Icons.add),
+                label: const Text('Add Item'),
+              ),
+              const SizedBox(height: 16.0),
+              DropdownButtonFormField<String>(
+                value: selectedDueDay,
+                decoration: const InputDecoration(labelText: 'Due Days'),
+                items: dueDaysOptions.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedDueDay = newValue!;
+                  });
+                },
+              ),
+              const SizedBox(height: 16.0),
+              TextField(
+                controller: memoController,
+                decoration: InputDecoration(
+                  labelText: 'Memo',
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: createInvoice,
+                child: const Text('Add Invoice'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
