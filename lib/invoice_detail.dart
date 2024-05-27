@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:stripe_invoice/constant.dart';
 import 'package:stripe_invoice/invoice.dart';
 import 'package:http/http.dart' as http;
+import 'package:stripe_invoice/progress_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -48,13 +49,26 @@ class InvoiceDetailScreen extends StatelessWidget {
     return {'invoice': invoiceData, 'account': accountData};
   }
 
-  void generateAndPrintInvoice(Invoice i) async {
+  void showProgress(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return ProgressDialog();
+      },
+    );
+  }
+
+  void hideProgress(BuildContext context) {
+    Navigator.of(context).pop();
+  }
+
+  void generateAndPrintInvoice(Invoice i, BuildContext context) async {
+    showProgress(context);
     final pdf = pw.Document();
     final data = await fetchInvoiceAndAccount(i.id);
     final invoice = data['invoice'];
     final account = data['account'];
-
-    print(account);
 
     final DateFormat dateFormat = DateFormat('MMMM d, y');
 
@@ -167,13 +181,14 @@ class InvoiceDetailScreen extends StatelessWidget {
       ),
     );
 
+    hideProgress(context);
     await Printing.sharePdf(
       bytes: await pdf.save(),
       filename: 'Invoice_${invoice['number']}.pdf',
     );
   }
 
-  Future<void> deleteDraftInvoice(String invoiceId) async {
+  Future<http.Response?> deleteDraftInvoice(String invoiceId) async {
     final url = 'https://api.stripe.com/v1/invoices/$invoiceId';
 
     try {
@@ -184,18 +199,14 @@ class InvoiceDetailScreen extends StatelessWidget {
         },
       );
 
-      if (response.statusCode == 200) {
-        print('Invoice deleted successfully');
-      } else {
-        print('Failed to delete invoice: ${response.statusCode}');
-        print(response.body);
-      }
+      return response;
     } catch (e) {
       print('Error deleting invoice: $e');
+      rethrow;
     }
   }
 
-  Future<void> finalizeInvoice(String invoiceId) async {
+  Future<http.Response?> finalizeInvoice(String invoiceId) async {
     final url = 'https://api.stripe.com/v1/invoices/$invoiceId/finalize';
 
     try {
@@ -205,19 +216,14 @@ class InvoiceDetailScreen extends StatelessWidget {
           'Authorization': 'Bearer $stripe_secret_key',
         },
       );
-
-      if (response.statusCode == 200) {
-        print('Invoice finalized successfully');
-      } else {
-        print('Failed to finalize invoice: ${response.statusCode}');
-        print(response.body);
-      }
+      return response;
     } catch (e) {
       print('Error finalizing invoice: $e');
+      rethrow;
     }
   }
 
-  Future<void> voidInvoice(String invoiceId) async {
+  Future<http.Response?> voidInvoice(String invoiceId) async {
     final url = 'https://api.stripe.com/v1/invoices/$invoiceId/void';
 
     try {
@@ -228,18 +234,14 @@ class InvoiceDetailScreen extends StatelessWidget {
         },
       );
 
-      if (response.statusCode == 200) {
-        print('Invoice voided successfully');
-      } else {
-        print('Failed to void invoice: ${response.statusCode}');
-        print(response.body);
-      }
+      return response;
     } catch (e) {
       print('Error voiding invoice: $e');
+      rethrow;
     }
   }
 
-  Future<void> markUncollectibleInvoice(String invoiceId) async {
+  Future<http.Response?> markUncollectibleInvoice(String invoiceId) async {
     final url =
         'https://api.stripe.com/v1/invoices/$invoiceId/mark_uncollectible';
 
@@ -250,20 +252,14 @@ class InvoiceDetailScreen extends StatelessWidget {
           'Authorization': 'Bearer $stripe_secret_key',
         },
       );
-
-      if (response.statusCode == 200) {
-        print('Invoice marked as uncollectible successfully');
-      } else {
-        print(
-            'Failed to mark invoice as uncollectible: ${response.statusCode}');
-        print(response.body);
-      }
+      return response;
     } catch (e) {
       print('Error marking invoice as uncollectible: $e');
+      rethrow;
     }
   }
 
-  Future<void> sendInvoice(String invoiceId) async {
+  Future<http.Response?> sendInvoice(String invoiceId) async {
     final url = 'https://api.stripe.com/v1/invoices/$invoiceId/send';
 
     try {
@@ -273,15 +269,10 @@ class InvoiceDetailScreen extends StatelessWidget {
           'Authorization': 'Bearer $stripe_secret_key',
         },
       );
-
-      if (response.statusCode == 200) {
-        print('Invoice sent successfully');
-      } else {
-        print('Failed to send invoice: ${response.statusCode}');
-        print(response.body);
-      }
+      return response;
     } catch (e) {
       print('Error sending invoice: $e');
+      rethrow;
     }
   }
 
@@ -506,7 +497,7 @@ class InvoiceDetailScreen extends StatelessWidget {
               },
             ),
             TextButton(
-              child:  Text(actionTitle,
+              child: Text(actionTitle,
                   style: TextStyle(
                       color: Colors.red, fontWeight: FontWeight.bold)),
               onPressed: () {
@@ -534,7 +525,8 @@ class InvoiceDetailScreen extends StatelessWidget {
       actions.addAll([
         _buildActionListItem(context, 'Pay Invoice', false, invoice),
         _buildActionListItem(context, 'Send Reminder Email', false, invoice),
-        _buildActionListItem(context, 'Mark Uncollectible Invoice', false, invoice),
+        _buildActionListItem(
+            context, 'Mark Uncollectible Invoice', false, invoice),
         _buildActionListItem(context, 'Cancel Invoice', true, invoice),
       ]);
     } else if (status == 'uncollectible') {
@@ -557,56 +549,117 @@ class InvoiceDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionListItem(BuildContext context, String text, bool isLastItem, Invoice invoice) {
+  Widget _buildActionListItem(
+      BuildContext context, String text, bool isLastItem, Invoice invoice) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
+        onTap: () async {
           // Navigate to the pay invoice screen when "Pay Invoice" is clicked
           if (text == 'Pay Invoice') {
             _launchInvoiceURL(invoice.hostedInvoiceUrl!);
           } else if (text == "Cancel Invoice") {
             _showConfirmDialog(context,
                 title: 'Confirm',
-                description:
-                'Are you sure you want to cancel this invoice?',
-                actionTitle: "Cancel Invoice", onDelete: () {
-                  // Define your delete action here
-                  voidInvoice(invoice.id);
-                });
+                description: 'Are you sure you want to cancel this invoice?',
+                actionTitle: "Cancel Invoice", onDelete: () async {
+              try {
+                final response = await voidInvoice(invoice.id);
+                if (response != null && response?.statusCode == 200) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Canceled invoice succeeded")));
+                } else {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(response!.body)));
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(e.toString())));
+              }
+            });
           } else if (text == "Mark Uncollectible Invoice") {
             _showConfirmDialog(context,
                 title: 'Confirm',
                 description:
-                "Are you sure you want to mark this invoice as uncollectible?",
-                actionTitle: "Mark Uncollectible", onDelete: () {
-                  // Define your delete action here
-                  markUncollectibleInvoice(invoice.id);
-                });
+                    "Are you sure you want to mark this invoice as uncollectible?",
+                actionTitle: "Mark Uncollectible", onDelete: () async {
+              try {
+                final response = await markUncollectibleInvoice(invoice.id);
+                if (response != null && response?.statusCode == 200) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(
+                          "Marked the invoice as uncollectible succeeded")));
+                } else {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(response!.body)));
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(e.toString())));
+              }
+            });
           } else if (text == "Finalize Invoice") {
             _showConfirmDialog(context,
                 title: 'Confirm',
                 description:
-                'To finalize an invoice is to transition it to an \'open\' state, allowing the customer to proceed with payment.',
-                actionTitle: "Finalize Invoice", onDelete: () {
-                  // Define your delete action here
-                  finalizeInvoice(invoice.id);
-                });
-          } else if (text == "Delete Invoice")  {
+                    'To finalize an invoice is to transition it to an \'open\' state, allowing the customer to proceed with payment.',
+                actionTitle: "Finalize Invoice", onDelete: () async {
+              try {
+                final response = await finalizeInvoice(invoice.id);
+                if (response != null && response?.statusCode == 200) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(
+                          "Finalized  invoice succeeded")));
+                } else {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(response!.body)));
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(e.toString())));
+              }
+            });
+          } else if (text == "Delete Invoice") {
             _showConfirmDialog(
               context,
               title: 'Confirm',
               description: 'Are you sure you want to delete this invoice?',
               actionTitle: "Delete Invoice",
-              onDelete: () {
+              onDelete: () async {
                 // Define your delete action here
-                deleteDraftInvoice(invoice.id);
+                try {
+                  final response = await deleteDraftInvoice(invoice.id);
+                  if (response != null && response?.statusCode == 200) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text(
+                            "Delete  invoice succeeded")));
+                  } else {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(response!.body)));
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(e.toString())));
+                }
               },
             );
           } else if (text == "Download Invoice PDF") {
-            generateAndPrintInvoice(invoice);
+            generateAndPrintInvoice(invoice, context);
           } else if (text == "Send Reminder Email") {
-            sendInvoice(invoice.id);
+            try {
+              final response = await sendInvoice(invoice.id);
+              if (response != null && response?.statusCode == 200) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text(
+                        "Send invoice succeeded")));
+              } else {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(response!.body)));
+              }
+            } catch (e) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(e.toString())));
+            }
           }
         },
         child: Column(

@@ -88,20 +88,27 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     _fetchInvoices();
   }
 
-  Future<void> _fetchInvoices() async {
-    if (!_isLoading && _hasMore) {
-      setState(() => _isLoading = true);
+  Future<void> _fetchInvoices({bool isRefreshing = false}) async {
+    if (!_isLoading) {
+      if (!isRefreshing) {
+        setState(() => _isLoading = true);
+      }
+
       final response = await http.get(
         Uri.https('api.stripe.com', '/v1/invoices', {
           'limit': '10',
-          'starting_after': _invoices.isNotEmpty ? _invoices.last.id : ''
+          'starting_after':isRefreshing ? '' : (_invoices.isNotEmpty ? _invoices.last.id : '')
         }),
         headers: {'Authorization': 'Bearer ${stripe_secret_key}'},
       );
+
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final List<dynamic> invoicesData = jsonData['data'];
         setState(() {
+          if (isRefreshing) {
+            _invoices.clear(); // Clear existing invoices if refreshing
+          }
           _invoices.addAll(
               invoicesData.map((data) => Invoice.fromJson(data)).toList());
           _hasMore = jsonData['has_more'];
@@ -110,8 +117,17 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       } else {
         print('Failed to fetch invoices: ${response.statusCode}');
       }
-      setState(() => _isLoading = false);
+      if (!isRefreshing) {
+        setState(() => _isLoading = false);
+      } else {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      }
     }
+  }
+
+  Future<void> _handleRefresh() async {
+    print("handle refresh");
+    await _fetchInvoices(isRefreshing: true);
   }
 
   @override
@@ -134,106 +150,113 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       ),
       body: _invoices.isEmpty
           ? const Center(
-        child: CircularProgressIndicator(),
-      )
+              child: CircularProgressIndicator(),
+            )
           : NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
-          if (scrollInfo.metrics.pixels ==
-              scrollInfo.metrics.maxScrollExtent &&
-              !_isLoading) {
-            _fetchInvoices();
-          }
-          return true;
-        },
-        child: ListView.builder(
-          itemCount: _invoices.length + 1,
-          itemBuilder: (context, index) {
-            if (index == _invoices.length) {
-              return _hasMore
-                  ? const Center(child: CircularProgressIndicator())
-                  : const SizedBox.shrink();
-            }
-            final invoice = _invoices[index];
-            return Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          InvoiceDetailScreen(invoice: invoice),
-                    ),
-                  );
+                onNotification: (ScrollNotification scrollInfo) {
+                  if (scrollInfo.metrics.pixels ==
+                          scrollInfo.metrics.maxScrollExtent &&
+                      !_isLoading) {
+                    _fetchInvoices();
+                  }
+                  return true;
                 },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(
-                      vertical: 5, horizontal: 10),
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white,
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            invoice.customerName,
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(invoice.status),
-                              borderRadius: BorderRadius.circular(8),
+                child: RefreshIndicator(
+                  onRefresh: _handleRefresh,
+                  child: ListView.builder(
+                  itemCount: _invoices.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == _invoices.length) {
+                      return _hasMore
+                          ? const Center(child: CircularProgressIndicator())
+                          : const SizedBox.shrink();
+                    }
+                    final invoice = _invoices[index];
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  InvoiceDetailScreen(invoice: invoice),
                             ),
-                            child: Text(
-                              invoice.status == 'void' ? 'canceled' : invoice.status,
-                              style: const TextStyle(
-                                  fontSize: 14, color: Colors.white),
-                            ),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 5, horizontal: 10),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white,
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '${invoice.currency.toUpperCase()} \$${invoice.amountDue.toStringAsFixed(2)}',
-                            style: const TextStyle(fontSize: 14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    invoice.customerName,
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: _getStatusColor(invoice.status),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      invoice.status == 'void'
+                                          ? 'canceled'
+                                          : invoice.status,
+                                      style: const TextStyle(
+                                          fontSize: 14, color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '${invoice.currency.toUpperCase()} \$${invoice.amountDue.toStringAsFixed(2)}',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                  Text(
+                                    _formatDate(invoice.periodEnd),
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                              const Divider(
+                                color: Colors.black12,
+                                thickness: 1,
+                              ),
+                            ],
                           ),
-                          Text(
-                            _formatDate(invoice.periodEnd),
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        ],
+                        ),
                       ),
-                      const Divider(
-                        color: Colors.black12,
-                        thickness: 1,
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ),
-            );
-          },
-        ),
-      ),
+            ),
     );
   }
 

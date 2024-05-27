@@ -3,17 +3,18 @@ import 'package:country_list_picker/country_list_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/constant.dart';
 
-class AddCustomerScreen extends StatefulWidget {
-  const AddCustomerScreen({Key? key}) : super(key: key);
+class CustomerDetailScreen extends StatefulWidget {
+  const CustomerDetailScreen({Key? key}) : super(key: key);
 
   @override
   _AddCustomerScreenState createState() => _AddCustomerScreenState();
 }
 
-class _AddCustomerScreenState extends State<AddCustomerScreen> {
+class _AddCustomerScreenState extends State<CustomerDetailScreen> {
   Countries selectedCountryCode = Countries.United_States;
   String? phoneNumber;
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController addressLine1Controller = TextEditingController();
@@ -96,14 +97,22 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
                   TextField(
-                    controller: nameController,
+                    controller: firstNameController,
                     decoration: InputDecoration(
-                      labelText: 'Name',
+                      labelText: 'First Name',
                       filled: true,
                       fillColor: Colors.grey[100],
                     ),
                   ),
                   SizedBox(height: 16),
+                  TextField(
+                    controller: lastNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Last Name',
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                    ),
+                  ),
               const SizedBox(height: 16.0),
               TextField(
                 controller: emailController,
@@ -210,7 +219,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ElevatedButton(
                 onPressed: () {
                   // Handle form submission
-                  String name = nameController.text;
+                  String firstName = firstNameController.text;
+                  String lastName = lastNameController.text;
                   String email = emailController.text;
                   String description = descriptionController.text;
                   String addressLine1 = addressLine1Controller.text;
@@ -220,7 +230,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   String postalCode = postalCodeController.text;
 
                   // Handle form submission
-                  print('name: $name');
+                  print('First Name: $firstName');
+                  print('Last Name: $lastName');
                   print('Email: $email');
                   print('Description: $description');
                   print('Address Line 1: $addressLine1');
@@ -232,7 +243,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   print('phone = ' + phoneNumber!);
 
                   createStripeCustomer(
-                    name: '$name',
+                    name: '$firstName $lastName',
                     email: email,
                     city: city,
                     country: selectedCountryCode.iso_3166_1_alpha2, // Assuming the country is the United States, you can change it as needed

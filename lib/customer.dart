@@ -45,22 +45,31 @@ class _CustomerScreenState extends State<CustomerScreen> {
     _fetchCustomers();
   }
 
-  Future<void> _fetchCustomers() async {
-    if (!_isLoading && _hasMore) {
-      setState(() => _isLoading = true);
+  Future<void> _fetchCustomers({bool refresh = false}) async {
+    if (!_isLoading || refresh) {
+      if (!refresh) {
+        setState(() => _isLoading = true);
+      }
       final int limit = 10; // Set the limit to the desired value
-      final String startingAfter = _customers.isNotEmpty
+      final String startingAfter = refresh
+          ? ''
+          : _customers.isNotEmpty
           ? _customers.last.id
           : ''; // Get the id of the last customer
       final response = await http.get(
-        Uri.https('api.stripe.com', '/v1/customers',
-            {'limit': '$limit', 'starting_after': startingAfter}),
+        Uri.https('api.stripe.com', '/v1/customers', {
+          'limit': '$limit',
+          if (!refresh) 'starting_after': startingAfter,
+        }),
         headers: {'Authorization': 'Bearer ${stripe_secret_key}'},
       );
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final List<dynamic> customersData = jsonData['data'];
         setState(() {
+          if (refresh) {
+            _customers.clear();
+          }
           _customers.addAll(
               customersData.map((data) => Customer.fromJson(data)).toList());
           _hasMore = jsonData['has_more'];
@@ -89,92 +98,98 @@ class _CustomerScreenState extends State<CustomerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Customers'),
-          backgroundColor: Colors.blue[400],
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddCustomerScreen()),
-                );
-              },
-            ),
-          ],
-        ),
-        body: _customers == null
+      appBar: AppBar(
+        title: const Text('Customers'),
+        backgroundColor: Colors.blue[400],
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddCustomerScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: _customers.isEmpty
             ? const Center(
-                child: CircularProgressIndicator(),
-              )
+          child: CircularProgressIndicator(),
+        )
             : NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification scrollInfo) {
-                  if (scrollInfo.metrics.pixels ==
-                          scrollInfo.metrics.maxScrollExtent &&
-                      !_isLoading) {
-                    _fetchCustomers();
-                  }
-                  return true;
-                },
-                child: ListView.builder(
-                  itemCount: _customers.length + (_hasMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index < _customers.length) {
-                      final customer = _customers[index];
-                      return Dismissible(
-                        key: Key(customer.id),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 20),
-                          child: const Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                          ),
-                        ),
-                        secondaryBackground: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 20),
-                          child: const Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                          ),
-                        ),
-                        confirmDismiss: (direction) async {
-                          // This is where you can show a confirmation dialog
-                          // if needed, return true to allow dismiss, false otherwise
-                          return true;
-                        },
-                        onDismissed: (direction) {
-                          // Remove the item from the data source
-                          setState(() {
-                            _customers.removeAt(index);
-                          });
-
-                          _deleteCustomer(customer.id);
-                        },
-                        child: ListTile(
-                          title: Text(customer.name),
-                          subtitle: Text(customer.email),
-                          onTap: () {
-                            // Return the selected customer to the previous screen
-                            if (widget.isFromAddInvoice)
-                              Navigator.pop(context, customer);
-                          },
-                        ),
-                      );
-                    } else if (_isLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else {
-                      return const SizedBox(); // Placeholder for the loading indicator
-                    }
+          onNotification: (ScrollNotification scrollInfo) {
+            if (scrollInfo.metrics.pixels ==
+                scrollInfo.metrics.maxScrollExtent &&
+                !_isLoading) {
+              _fetchCustomers();
+            }
+            return true;
+          },
+          child: RefreshIndicator(
+            onRefresh: () =>
+                _fetchCustomers(refresh: true)
+            ,
+            child: ListView.builder(
+            itemCount: _customers.length + (_hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index < _customers.length) {
+                final customer = _customers[index];
+                return Dismissible(
+                  key: Key(customer.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                  secondaryBackground: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                  confirmDismiss: (direction) async {
+                    // This is where you can show a confirmation dialog
+                    // if needed, return true to allow dismiss, false otherwise
+                    return true;
                   },
-                ),
-              ));
+                  onDismissed: (direction) {
+                    // Remove the item from the data source
+                    setState(() {
+                      _customers.removeAt(index);
+                    });
+
+                    _deleteCustomer(customer.id);
+                  },
+                  child: ListTile(
+                    title: Text(customer.name),
+                    subtitle: Text(customer.email),
+                    onTap: () {
+                      // Return the selected customer to the previous screen
+                      if (widget.isFromAddInvoice)
+                        Navigator.pop(context, customer);
+                    },
+                  ),
+                );
+              } else if (_isLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else {
+              return const SizedBox(); // Placeholder for the loading indicator
+              }
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
