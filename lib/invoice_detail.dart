@@ -1,0 +1,638 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:stripe_invoice/constant.dart';
+import 'package:stripe_invoice/invoice.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'dart:convert';
+import 'package:intl/intl.dart';
+
+class InvoiceDetailScreen extends StatelessWidget {
+  final Invoice invoice;
+
+  const InvoiceDetailScreen({Key? key, required this.invoice})
+      : super(key: key);
+
+  Future<Map<String, dynamic>> fetchInvoiceAndAccount(String invoiceId) async {
+    final invoiceResponse = await http.get(
+      Uri.parse('https://api.stripe.com/v1/invoices/$invoiceId'),
+      headers: {
+        'Authorization': 'Bearer ${stripe_secret_key}',
+        // Replace with your Stripe secret key
+      },
+    );
+
+    if (invoiceResponse.statusCode != 200) {
+      throw Exception('Failed to load invoice');
+    }
+
+    final invoiceData = json.decode(invoiceResponse.body);
+
+    final accountResponse = await http.get(
+      Uri.parse('https://api.stripe.com/v1/account'),
+      headers: {
+        'Authorization': 'Bearer ${stripe_secret_key}',
+        // Replace with your Stripe secret key
+      },
+    );
+
+    if (accountResponse.statusCode != 200) {
+      throw Exception('Failed to load account information');
+    }
+
+    final accountData = json.decode(accountResponse.body);
+    print(accountData);
+    return {'invoice': invoiceData, 'account': accountData};
+  }
+
+  void generateAndPrintInvoice(Invoice i) async {
+    final pdf = pw.Document();
+    final data = await fetchInvoiceAndAccount(i.id);
+    final invoice = data['invoice'];
+    final account = data['account'];
+
+    print(account);
+
+    final DateFormat dateFormat = DateFormat('MMMM d, y');
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          final dateOfIssue =
+              DateTime.fromMillisecondsSinceEpoch(invoice['created'] * 1000);
+          final dueDate =
+              DateTime.fromMillisecondsSinceEpoch(invoice['due_date'] * 1000);
+          final formattedDueDate = dateFormat.format(dueDate);
+
+          return pw.Padding(
+            padding: pw.EdgeInsets.all(20),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Invoice',
+                    style: pw.TextStyle(
+                        fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 20),
+                pw.Text('Invoice number ${invoice['number']}'),
+                pw.Text('Date of issue ${formattedDueDate}'),
+                pw.Text('Due Date ${formattedDueDate}'),
+                pw.SizedBox(height: 20),
+                pw.Text('Billing details:'),
+                pw.Text('${invoice['customer_name']}'),
+                pw.Text('${invoice['customer_email']}'),
+                pw.SizedBox(height: 20),
+                pw.Table(
+                  columnWidths: {
+                    0: pw.FlexColumnWidth(4),
+                    1: pw.FlexColumnWidth(1),
+                    2: pw.FlexColumnWidth(1),
+                    3: pw.FlexColumnWidth(1),
+                  },
+                  children: [
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text('Description'),
+                        ),
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text('Qty'),
+                        ),
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text('Unit price'),
+                        ),
+                        pw.Padding(
+                          padding: pw.EdgeInsets.all(8),
+                          child: pw.Text('Amount'),
+                        ),
+                      ],
+                    ),
+                    ...invoice['lines']['data'].map<pw.TableRow>((line) {
+                      final description = line['description'] ?? '';
+                      final quantity = line['quantity'].toString();
+                      final unitPrice =
+                          (line['amount'] / line['quantity'] / 100)
+                              .toStringAsFixed(2);
+                      final amount = (line['amount'] / 100).toStringAsFixed(2);
+                      return pw.TableRow(
+                        children: [
+                          pw.Padding(
+                            padding: pw.EdgeInsets.all(8),
+                            child: pw.Text(description),
+                          ),
+                          pw.Padding(
+                            padding: pw.EdgeInsets.all(8),
+                            child: pw.Text(quantity),
+                          ),
+                          pw.Padding(
+                            padding: pw.EdgeInsets.all(8),
+                            child: pw.Text(unitPrice),
+                          ),
+                          pw.Padding(
+                            padding: pw.EdgeInsets.all(8),
+                            child: pw.Text(amount),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ],
+                ),
+                pw.Divider(),
+                pw.SizedBox(height: 10),
+                pw.Align(
+                  alignment: pw.Alignment.centerRight,
+                  child: pw.Text(
+                      'Subtotal: ${(invoice['subtotal'] / 100).toStringAsFixed(2)} ${invoice['currency'].toUpperCase()}'),
+                ),
+                pw.Align(
+                  alignment: pw.Alignment.centerRight,
+                  child: pw.Text(
+                      'Total: ${(invoice['total'] / 100).toStringAsFixed(2)} ${invoice['currency'].toUpperCase()}'),
+                ),
+                pw.Align(
+                  alignment: pw.Alignment.centerRight,
+                  child: pw.Text(
+                      'Amount due: ${(invoice['amount_due'] / 100).toStringAsFixed(2)} ${invoice['currency'].toUpperCase()}'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    await Printing.sharePdf(
+      bytes: await pdf.save(),
+      filename: 'Invoice_${invoice['number']}.pdf',
+    );
+  }
+
+  Future<void> deleteDraftInvoice(String invoiceId) async {
+    final url = 'https://api.stripe.com/v1/invoices/$invoiceId';
+
+    try {
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $stripe_secret_key',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Invoice deleted successfully');
+      } else {
+        print('Failed to delete invoice: ${response.statusCode}');
+        print(response.body);
+      }
+    } catch (e) {
+      print('Error deleting invoice: $e');
+    }
+  }
+
+  Future<void> finalizeInvoice(String invoiceId) async {
+    final url = 'https://api.stripe.com/v1/invoices/$invoiceId/finalize';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $stripe_secret_key',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Invoice finalized successfully');
+      } else {
+        print('Failed to finalize invoice: ${response.statusCode}');
+        print(response.body);
+      }
+    } catch (e) {
+      print('Error finalizing invoice: $e');
+    }
+  }
+
+  Future<void> voidInvoice(String invoiceId) async {
+    final url = 'https://api.stripe.com/v1/invoices/$invoiceId/void';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $stripe_secret_key',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Invoice voided successfully');
+      } else {
+        print('Failed to void invoice: ${response.statusCode}');
+        print(response.body);
+      }
+    } catch (e) {
+      print('Error voiding invoice: $e');
+    }
+  }
+
+  Future<void> markUncollectibleInvoice(String invoiceId) async {
+    final url =
+        'https://api.stripe.com/v1/invoices/$invoiceId/mark_uncollectible';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $stripe_secret_key',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Invoice marked as uncollectible successfully');
+      } else {
+        print(
+            'Failed to mark invoice as uncollectible: ${response.statusCode}');
+        print(response.body);
+      }
+    } catch (e) {
+      print('Error marking invoice as uncollectible: $e');
+    }
+  }
+
+  Future<void> sendInvoice(String invoiceId) async {
+    final url = 'https://api.stripe.com/v1/invoices/$invoiceId/send';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $stripe_secret_key',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Invoice sent successfully');
+      } else {
+        print('Failed to send invoice: ${response.statusCode}');
+        print(response.body);
+      }
+    } catch (e) {
+      print('Error sending invoice: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Invoice Details'),
+      ),
+      body: Container(
+        color: Colors.grey.shade200,
+        child: ListView(
+          padding: EdgeInsets.all(8.0),
+          children: [
+            _buildDetailSection(),
+            SizedBox(height: 20),
+            if (invoice.lineItems.isNotEmpty) _buildLineItemsSection(),
+            SizedBox(height: 20),
+            if (invoice.status != 'void') _buildActionSection(context),
+            SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLineItemsSection() {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Table(
+            columnWidths: {
+              0: FlexColumnWidth(3),
+              1: FlexColumnWidth(1),
+              2: FlexColumnWidth(2),
+              3: FlexColumnWidth(2),
+            },
+            children: [
+              TableRow(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Text('Description',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600)),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Text('Qty',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600)),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Text('Unit price',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600)),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Text('Amount',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              ),
+              ...invoice.lineItems.map<TableRow>((line) {
+                return TableRow(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Text(
+                        line.description,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Text(line.quantity.toString()),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Text(line.unitPrice.toStringAsFixed(2)),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Text(line.amount.toStringAsFixed(2)),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailSection() {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        children: [
+          _buildDetailRow('Customer Name', invoice.customerName),
+          _buildDetailRow('Status', invoice.status),
+          _buildDetailRow('Amount Due',
+              '${invoice.currency.toUpperCase()} \$${invoice.amountDue.toStringAsFixed(2)}'),
+          _buildDetailRow('Due Date', _formatDate(invoice.periodEnd)),
+          if (invoice.hostedInvoiceUrl != null)
+            _buildDetailRowWithCopyIcon(
+                'View Invoice', invoice.hostedInvoiceUrl!),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionSection(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+          ),
+          _buildActionsBasedOnStatus(context, invoice),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String title, String value) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(title),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+              // Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            ],
+          ),
+        ),
+        if (title != 'Due Date' ||
+            (title == 'Due Date' && invoice.hostedInvoiceUrl != null))
+          Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+      ],
+    );
+  }
+
+  Widget _buildDetailRowWithCopyIcon(String title, String url) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(title),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.copy, size: 16, color: Colors.blue),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: url));
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   SnackBar(content: Text('Copied to clipboard')),
+                  // );
+                },
+              ),
+              // Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            ],
+          ),
+        ),
+        // Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+      ],
+    );
+  }
+
+  void _showConfirmDialog(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required String actionTitle,
+    required VoidCallback onDelete,
+  }) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0))),
+          backgroundColor: Colors.white,
+          title: Text(title),
+          content: Text(description),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                'Cancel',
+                style:
+                    TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child:  Text(actionTitle,
+                  style: TextStyle(
+                      color: Colors.red, fontWeight: FontWeight.bold)),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                onDelete(); // Call the delete callback
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildActionsBasedOnStatus(BuildContext context, Invoice invoice) {
+    var status = invoice.status;
+
+    List<Widget> actions = [];
+
+    if (status == 'draft') {
+      actions.addAll([
+        _buildActionListItem(context, 'Delete Invoice', false, invoice),
+        _buildActionListItem(context, 'Finalize Invoice', true, invoice),
+      ]);
+    } else if (status == 'open') {
+      actions.addAll([
+        _buildActionListItem(context, 'Pay Invoice', false, invoice),
+        _buildActionListItem(context, 'Send Reminder Email', false, invoice),
+        _buildActionListItem(context, 'Mark Uncollectible Invoice', false, invoice),
+        _buildActionListItem(context, 'Cancel Invoice', true, invoice),
+      ]);
+    } else if (status == 'uncollectible') {
+      actions.addAll([
+        _buildActionListItem(context, 'Cancel Invoice', false, invoice),
+        _buildActionListItem(context, 'Pay Invoice', true, invoice),
+      ]);
+    } else if (status == 'paid') {
+      actions.addAll([
+        _buildActionListItem(context, 'Download Invoice PDF', true, invoice),
+        // _buildActionListItem(context, 'Download Receipt PDF', () {
+        //   // Add your action here
+        // }, true, invoice),
+      ]);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: actions,
+    );
+  }
+
+  Widget _buildActionListItem(BuildContext context, String text, bool isLastItem, Invoice invoice) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          // Navigate to the pay invoice screen when "Pay Invoice" is clicked
+          if (text == 'Pay Invoice') {
+            _launchInvoiceURL(invoice.hostedInvoiceUrl!);
+          } else if (text == "Cancel Invoice") {
+            _showConfirmDialog(context,
+                title: 'Confirm',
+                description:
+                'Are you sure you want to cancel this invoice?',
+                actionTitle: "Cancel Invoice", onDelete: () {
+                  // Define your delete action here
+                  voidInvoice(invoice.id);
+                });
+          } else if (text == "Mark Uncollectible Invoice") {
+            _showConfirmDialog(context,
+                title: 'Confirm',
+                description:
+                "Are you sure you want to mark this invoice as uncollectible?",
+                actionTitle: "Mark Uncollectible", onDelete: () {
+                  // Define your delete action here
+                  markUncollectibleInvoice(invoice.id);
+                });
+          } else if (text == "Finalize Invoice") {
+            _showConfirmDialog(context,
+                title: 'Confirm',
+                description:
+                'To finalize an invoice is to transition it to an \'open\' state, allowing the customer to proceed with payment.',
+                actionTitle: "Finalize Invoice", onDelete: () {
+                  // Define your delete action here
+                  finalizeInvoice(invoice.id);
+                });
+          } else if (text == "Delete Invoice")  {
+            _showConfirmDialog(
+              context,
+              title: 'Confirm',
+              description: 'Are you sure you want to delete this invoice?',
+              actionTitle: "Delete Invoice",
+              onDelete: () {
+                // Define your delete action here
+                deleteDraftInvoice(invoice.id);
+              },
+            );
+          } else if (text == "Download Invoice PDF") {
+            generateAndPrintInvoice(invoice);
+          } else if (text == "Send Reminder Email") {
+            sendInvoice(invoice.id);
+          }
+        },
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(text, style: TextStyle(color: Colors.blue)),
+              trailing:
+                  Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            ),
+            if (!isLastItem)
+              Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchInvoiceURL(String url) async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}

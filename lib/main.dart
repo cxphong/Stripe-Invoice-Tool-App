@@ -20,17 +20,20 @@ class MyApp extends StatelessWidget {
         textTheme: Typography.material2018().black.apply(
           bodyColor: Colors.black,
           displayColor: Colors.black,
-          fontFamily: '.SF Pro Text', // San Francisco font family
+          fontFamily: 'Urbanist', // San Francisco font family
         ).copyWith(
           // Adjust font weight for all text styles
           bodyLarge: TextStyle(
-            fontWeight: FontWeight.w500, // Increase font weight for body text
+            fontWeight: FontWeight.w500,
+            fontFamily: "Urbanist"
           ),
           bodyMedium: TextStyle(
             fontWeight: FontWeight.w400, // Increase font weight for body text
+              fontFamily: "Urbanist"
           ),
           bodySmall: TextStyle(
             fontWeight: FontWeight.w300, // Increase font weight for headline text
+              fontFamily: "Urbanist"
           )
           // Add more text styles as needed
         ),
@@ -67,13 +70,14 @@ class _MyHomePageState extends State<MyHomePage> {
         children: _screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.blue[400],
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.edit_document),
             label: 'Invoice',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.business),
+            icon: Icon(Icons.people),
             label: 'Customer',
           ),
           // BottomNavigationBarItem(
@@ -82,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: Colors.white,
         onTap: _onItemTapped,
       ),
     );
