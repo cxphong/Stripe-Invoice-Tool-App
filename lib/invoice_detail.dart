@@ -10,43 +10,13 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:stripe_invoice/utils.dart';
 
 class InvoiceDetailScreen extends StatelessWidget {
   final Invoice invoice;
 
   const InvoiceDetailScreen({Key? key, required this.invoice})
       : super(key: key);
-
-  Future<Map<String, dynamic>> fetchInvoiceAndAccount(String invoiceId) async {
-    final invoiceResponse = await http.get(
-      Uri.parse('https://api.stripe.com/v1/invoices/$invoiceId'),
-      headers: {
-        'Authorization': 'Bearer ${stripe_secret_key}',
-        // Replace with your Stripe secret key
-      },
-    );
-
-    if (invoiceResponse.statusCode != 200) {
-      throw Exception('Failed to load invoice');
-    }
-
-    final invoiceData = json.decode(invoiceResponse.body);
-    print (invoiceData);
-    final accountResponse = await http.get(
-      Uri.parse('https://api.stripe.com/v1/account'),
-      headers: {
-        'Authorization': 'Bearer ${stripe_secret_key}',
-        // Replace with your Stripe secret key
-      },
-    );
-
-    if (accountResponse.statusCode != 200) {
-      throw Exception('Failed to load account information');
-    }
-
-    final accountData = json.decode(accountResponse.body);
-    return {'invoice': invoiceData, 'account': accountData};
-  }
 
   void showProgress(BuildContext context) {
     showDialog(
@@ -62,129 +32,33 @@ class InvoiceDetailScreen extends StatelessWidget {
     Navigator.of(context).pop();
   }
 
-  void generateAndPrintInvoice(Invoice i, BuildContext context) async {
+  Future<void> sharePdfFromUrl(String pdfUrl, String filename) async {
+    try {
+      // Download the PDF from the URL
+      var response = await http.get(Uri.parse(pdfUrl));
+      if (response.statusCode == 200) {
+        Uint8List bytes = response.bodyBytes;
+
+        // Share the downloaded PDF
+        await Printing.sharePdf(
+          bytes: bytes,
+          filename: filename,
+        );
+      } else {
+        // Handle error if PDF download fails
+        print('Failed to download PDF. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle any exceptions that occur during the process
+      print('Error sharing PDF: $e');
+    }
+  }
+
+  void generateAndPrintInvoice(Invoice invoice, BuildContext context) async {
     showProgress(context);
-    final pdf = pw.Document();
-    final data = await fetchInvoiceAndAccount(i.id);
-    final invoice = data['invoice'];
-    final account = data['account'];
 
-    final DateFormat dateFormat = DateFormat('MMMM d, y');
-
-    pdf.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        build: (pw.Context context) {
-          final dateOfIssue =
-              DateTime.fromMillisecondsSinceEpoch(invoice['created'] * 1000);
-          final dueDate =
-              DateTime.fromMillisecondsSinceEpoch(invoice['due_date'] * 1000);
-          final formattedDueDate = dateFormat.format(dueDate);
-
-          return pw.Padding(
-            padding: pw.EdgeInsets.all(20),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text('Invoice',
-                    style: pw.TextStyle(
-                        fontSize: 24, fontWeight: pw.FontWeight.bold)),
-                pw.SizedBox(height: 20),
-                pw.Text('Invoice number ${invoice['number']}'),
-                pw.Text('Date of issue ${formattedDueDate}'),
-                pw.Text('Due Date ${formattedDueDate}'),
-                pw.SizedBox(height: 20),
-                pw.Text('Billing details:'),
-                pw.Text('${invoice['customer_name']}'),
-                pw.Text('${invoice['customer_email']}'),
-                pw.SizedBox(height: 20),
-                pw.Table(
-                  columnWidths: {
-                    0: pw.FlexColumnWidth(4),
-                    1: pw.FlexColumnWidth(1),
-                    2: pw.FlexColumnWidth(1),
-                    3: pw.FlexColumnWidth(1),
-                  },
-                  children: [
-                    pw.TableRow(
-                      children: [
-                        pw.Padding(
-                          padding: pw.EdgeInsets.all(8),
-                          child: pw.Text('Description'),
-                        ),
-                        pw.Padding(
-                          padding: pw.EdgeInsets.all(8),
-                          child: pw.Text('Qty'),
-                        ),
-                        pw.Padding(
-                          padding: pw.EdgeInsets.all(8),
-                          child: pw.Text('Unit price'),
-                        ),
-                        pw.Padding(
-                          padding: pw.EdgeInsets.all(8),
-                          child: pw.Text('Amount'),
-                        ),
-                      ],
-                    ),
-                    ...invoice['lines']['data'].map<pw.TableRow>((line) {
-                      final description = line['description'] ?? '';
-                      final quantity = line['quantity'].toString();
-                      final unitPrice =
-                          (line['amount'] / line['quantity'] / 100)
-                              .toStringAsFixed(2);
-                      final amount = (line['amount'] / 100).toStringAsFixed(2);
-                      return pw.TableRow(
-                        children: [
-                          pw.Padding(
-                            padding: pw.EdgeInsets.all(8),
-                            child: pw.Text(description),
-                          ),
-                          pw.Padding(
-                            padding: pw.EdgeInsets.all(8),
-                            child: pw.Text(quantity),
-                          ),
-                          pw.Padding(
-                            padding: pw.EdgeInsets.all(8),
-                            child: pw.Text(unitPrice),
-                          ),
-                          pw.Padding(
-                            padding: pw.EdgeInsets.all(8),
-                            child: pw.Text(amount),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ],
-                ),
-                pw.Divider(),
-                pw.SizedBox(height: 10),
-                pw.Align(
-                  alignment: pw.Alignment.centerRight,
-                  child: pw.Text(
-                      'Subtotal: ${(invoice['subtotal'] / 100).toStringAsFixed(2)} ${invoice['currency'].toUpperCase()}'),
-                ),
-                pw.Align(
-                  alignment: pw.Alignment.centerRight,
-                  child: pw.Text(
-                      'Total: ${(invoice['total'] / 100).toStringAsFixed(2)} ${invoice['currency'].toUpperCase()}'),
-                ),
-                pw.Align(
-                  alignment: pw.Alignment.centerRight,
-                  child: pw.Text(
-                      'Amount due: ${(invoice['amount_due'] / 100).toStringAsFixed(2)} ${invoice['currency'].toUpperCase()}'),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-
+    await sharePdfFromUrl(invoice.invoicePdf!, 'Invoice_${invoice.number}.pdf');
     hideProgress(context);
-    await Printing.sharePdf(
-      bytes: await pdf.save(),
-      filename: 'Invoice_${invoice['number']}.pdf',
-    );
   }
 
   Future<http.Response?> deleteDraftInvoice(String invoiceId) async {
@@ -296,11 +170,6 @@ class InvoiceDetailScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String decodeText(String encodedText) {
-    // Decode the text using UTF-8 encoding
-    return utf8.decode(encodedText.runes.toList());
   }
 
   Widget _buildLineItemsSection() {
@@ -538,7 +407,8 @@ class InvoiceDetailScreen extends StatelessWidget {
         _buildActionListItem(context, 'Cancel Invoice', false, invoice),
         _buildActionListItem(context, 'Pay Invoice', true, invoice),
       ]);
-    } else if (status == 'paid') {
+    }
+    if (invoice.invoicePdf != null) {
       actions.addAll([
         _buildActionListItem(context, 'Download Invoice PDF', true, invoice),
         // _buildActionListItem(context, 'Download Receipt PDF', () {
@@ -612,11 +482,10 @@ class InvoiceDetailScreen extends StatelessWidget {
                 final response = await finalizeInvoice(invoice.id);
                 if (response != null && response?.statusCode == 200) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text(
-                          "Finalized  invoice succeeded")));
+                      content: Text("Finalized  invoice succeeded")));
                 } else {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text(jsonDecode(response!.body))));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(jsonDecode(response!.body))));
                 }
               } catch (e) {
                 ScaffoldMessenger.of(context)
@@ -635,8 +504,7 @@ class InvoiceDetailScreen extends StatelessWidget {
                   final response = await deleteDraftInvoice(invoice.id);
                   if (response != null && response?.statusCode == 200) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text(
-                            "Delete  invoice succeeded")));
+                        content: Text("Delete  invoice succeeded")));
                   } else {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text(response!.body)));
@@ -653,9 +521,8 @@ class InvoiceDetailScreen extends StatelessWidget {
             try {
               final response = await sendInvoice(invoice.id);
               if (response != null && response?.statusCode == 200) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text(
-                        "Send invoice succeeded")));
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Send invoice succeeded")));
               } else {
                 ScaffoldMessenger.of(context)
                     .showSnackBar(SnackBar(content: Text(response!.body)));

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/add_customer.dart';
 import 'package:stripe_invoice/constant.dart';
+import 'package:stripe_invoice/utils.dart';
 
 class Customer {
   final String id;
@@ -93,11 +94,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
     } else {
       print('Failed to delete customer: ${response.statusCode}');
     }
-  }
-
-  String decodeText(String encodedText) {
-    // Decode the text using UTF-8 encoding
-    return utf8.decode(encodedText.runes.toList());
   }
 
   @override

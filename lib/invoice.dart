@@ -39,6 +39,8 @@ class Invoice {
   final String currency;
   final String? hostedInvoiceUrl;
   final List<LineItem> lineItems;
+  final String? invoicePdf;
+  final String? number;
 
   Invoice({
     required this.id,
@@ -49,6 +51,8 @@ class Invoice {
     required this.currency,
     required this.hostedInvoiceUrl,
     required this.lineItems,
+    required this.invoicePdf,
+    required this.number
   });
 
   factory Invoice.fromJson(Map<String, dynamic> json) {
@@ -65,6 +69,8 @@ class Invoice {
       currency: json['currency'],
       hostedInvoiceUrl: json['hosted_invoice_url'],
       lineItems: lineItemsList,
+      invoicePdf: json['invoice_pdf'],
+      number: json['number']
     );
   }
 }
