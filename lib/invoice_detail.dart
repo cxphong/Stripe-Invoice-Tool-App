@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stripe_invoice/constant.dart';
+import 'package:stripe_invoice/custom_appbar.dart';
 import 'package:stripe_invoice/invoice.dart';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/progress_dialog.dart';
@@ -154,15 +155,17 @@ class InvoiceDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Invoice Details'),
+        // foregroundColor: Colors.white,
+        backgroundColor: Color(0xFF5469d4),
       ),
       body: Container(
-        color: Colors.grey.shade200,
+        // color: Colors.grey.shade200,
         child: ListView(
           padding: EdgeInsets.all(8.0),
           children: [
-            _buildDetailSection(),
+            _buildDetailSection(context),
             SizedBox(height: 20),
-            if (invoice.lineItems.isNotEmpty) _buildLineItemsSection(),
+            if (invoice.lineItems.isNotEmpty) _buildLineItemsSection(context),
             SizedBox(height: 20),
             if (invoice.status != 'void') _buildActionSection(context),
             SizedBox(height: 20),
@@ -172,13 +175,14 @@ class InvoiceDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLineItemsSection() {
+  Widget _buildLineItemsSection(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Theme.of(context).brightness == Brightness.light
+            ? Border.all(color: Colors.grey.shade300) // Light theme border
+            : Border.all(), // Dark theme border
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,13 +254,14 @@ class InvoiceDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailSection() {
+  Widget _buildDetailSection(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Theme.of(context).brightness == Brightness.light
+            ? Border.all(color: Colors.grey.shade300) // Light theme border
+            : Border.all(), // Dark theme border
       ),
       child: Column(
         children: [
@@ -267,7 +272,7 @@ class InvoiceDetailScreen extends StatelessWidget {
           _buildDetailRow('Due Date', _formatDate(invoice.periodEnd)),
           if (invoice.hostedInvoiceUrl != null)
             _buildDetailRowWithCopyIcon(
-                'View Invoice', invoice.hostedInvoiceUrl!),
+                'Invoice URL', invoice.hostedInvoiceUrl!),
         ],
       ),
     );
@@ -276,11 +281,12 @@ class InvoiceDetailScreen extends StatelessWidget {
   Widget _buildActionSection(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.0),
+          border: Theme.of(context).brightness == Brightness.light
+              ? Border.all(color: Colors.grey.shade300) // Light theme border
+              : Border.all(), // Dark theme border
+        ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -303,7 +309,7 @@ class InvoiceDetailScreen extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+                // style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
               // Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
             ],
@@ -311,7 +317,8 @@ class InvoiceDetailScreen extends StatelessWidget {
         ),
         if (title != 'Due Date' ||
             (title == 'Due Date' && invoice.hostedInvoiceUrl != null))
-          Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+          // Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+          Divider()
       ],
     );
   }
@@ -325,7 +332,7 @@ class InvoiceDetailScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: Icon(Icons.copy, size: 16, color: Colors.blue),
+                icon: Icon(Icons.copy, size: 16, color: Color(0xFF5469d4)),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: url));
                   // ScaffoldMessenger.of(context).showSnackBar(
@@ -355,7 +362,7 @@ class InvoiceDetailScreen extends StatelessWidget {
         return AlertDialog(
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(8.0))),
-          backgroundColor: Colors.white,
+          // backgroundColor: Colors.white,
           title: Text(title),
           content: Text(description),
           actions: <Widget>[
@@ -392,7 +399,7 @@ class InvoiceDetailScreen extends StatelessWidget {
     if (status == 'draft') {
       actions.addAll([
         _buildActionListItem(context, 'Delete Invoice', false, invoice),
-        _buildActionListItem(context, 'Finalize Invoice', true, invoice),
+        _buildActionListItem(context, 'Finalize Invoice', invoice.invoicePdf == null, invoice),
       ]);
     } else if (status == 'open') {
       actions.addAll([
@@ -400,14 +407,15 @@ class InvoiceDetailScreen extends StatelessWidget {
         _buildActionListItem(context, 'Send Reminder Email', false, invoice),
         _buildActionListItem(
             context, 'Mark Uncollectible Invoice', false, invoice),
-        _buildActionListItem(context, 'Cancel Invoice', true, invoice),
+        _buildActionListItem(context, 'Cancel Invoice', invoice.invoicePdf == null, invoice),
       ]);
     } else if (status == 'uncollectible') {
       actions.addAll([
         _buildActionListItem(context, 'Cancel Invoice', false, invoice),
-        _buildActionListItem(context, 'Pay Invoice', true, invoice),
+        _buildActionListItem(context, 'Pay Invoice', invoice.invoicePdf == null, invoice),
       ]);
     }
+
     if (invoice.invoicePdf != null) {
       actions.addAll([
         _buildActionListItem(context, 'Download Invoice PDF', true, invoice),
@@ -426,7 +434,7 @@ class InvoiceDetailScreen extends StatelessWidget {
   Widget _buildActionListItem(
       BuildContext context, String text, bool isLastItem, Invoice invoice) {
     return Material(
-      color: Colors.transparent,
+      // color: Colors.transparent,
       child: InkWell(
         onTap: () async {
           // Navigate to the pay invoice screen when "Pay Invoice" is clicked
@@ -536,12 +544,12 @@ class InvoiceDetailScreen extends StatelessWidget {
         child: Column(
           children: [
             ListTile(
-              title: Text(text, style: TextStyle(color: Colors.blue)),
+              title: Text(text, style: TextStyle(color: Color(0xFF5469d4))),
               trailing:
                   Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
             ),
             if (!isLastItem)
-              Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+              Divider(),
           ],
         ),
       ),

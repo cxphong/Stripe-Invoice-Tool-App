@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/add_invoice.dart';
 import 'package:stripe_invoice/invoice_detail.dart';
 import 'package:stripe_invoice/constant.dart';
+import 'package:stripe_invoice/custom_appbar.dart';
+import 'package:stripe_invoice/settings-page.dart';
+import 'package:stripe_invoice/settings.dart';
 
 class LineItem {
   final String description;
@@ -140,8 +143,19 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Invoices'),
-        backgroundColor: Colors.blue[400],
+        title: Text('Invoices'),
+        // foregroundColor: Colors.white,
+        backgroundColor: Color(0xFF5469d4),
+        leading: IconButton(
+          icon: Icon(Icons.settings),
+          onPressed: () {
+            // Handle settings button press
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsPage()),
+            );
+          },
+        ),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add),
@@ -179,7 +193,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                     }
                     final invoice = _invoices[index];
                     return Material(
-                      color: Colors.transparent,
+                      // color: Colors.transparent,
                       child: InkWell(
                         onTap: () {
                           Navigator.push(
@@ -194,17 +208,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           margin: const EdgeInsets.symmetric(
                               vertical: 5, horizontal: 10),
                           padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.white,
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -215,8 +218,8 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                   Text(
                                     invoice.customerName,
                                     style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold),
+                                        fontSize: 16
+                                    ),
                                   ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -225,13 +228,31 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                       color: _getStatusColor(invoice.status),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Text(
-                                      invoice.status == 'void'
-                                          ? 'canceled'
-                                          : invoice.status,
-                                      style: const TextStyle(
-                                          fontSize: 14, color: Colors.white),
-                                    ),
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        final uncollectibleTextWidth = TextPainter(
+                                          text: TextSpan(
+                                            text: 'uncollectible', // Longest status text
+                                            style: const TextStyle(fontSize: 14),
+                                          ),
+                                          textDirection: TextDirection.ltr,
+                                        )..layout(maxWidth: double.infinity);
+
+                                        final uncollectibleWidth = uncollectibleTextWidth.width;
+
+                                        return SizedBox(
+                                          width: uncollectibleWidth,
+                                          child: Text(
+                                            invoice.status == 'void' ? 'canceled' : invoice.status,
+                                            style: const TextStyle(fontSize: 14),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        );
+                                      },
+                                    )
+
                                   ),
                                 ],
                               ),
@@ -251,8 +272,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                 ],
                               ),
                               const Divider(
-                                color: Colors.black12,
-                                thickness: 1,
+                                // color: Colors.black12,
                               ),
                             ],
                           ),
@@ -284,6 +304,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+    return '${date.month}/${date.day}/${date.year}';
   }
 }

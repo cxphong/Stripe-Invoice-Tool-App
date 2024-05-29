@@ -58,6 +58,7 @@ class _ProductScreenState extends State<ProductScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products'),
+        backgroundColor: Color(0xFF5469d4),
       ),
       body: _products == null
           ? const Center(
@@ -73,30 +74,18 @@ class _ProductScreenState extends State<ProductScreen> {
               width: double.infinity,
               margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     product.name,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 16,),
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
                         child: Divider(
-                          color: Colors.black12, // Set the color of the divider
                         ),
                       ),
                     ],

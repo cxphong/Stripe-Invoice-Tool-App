@@ -5,7 +5,6 @@ class ProgressDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(8.0))),
       child: Padding(
@@ -15,7 +14,7 @@ class ProgressDialog extends StatelessWidget {
           children: [
             CircularProgressIndicator(),
             SizedBox(width: 20.0),
-            Text("Loading..."),
+            Text("Downloading..."),
           ],
         ),
       ),

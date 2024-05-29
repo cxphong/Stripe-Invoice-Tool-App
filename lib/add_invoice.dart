@@ -211,6 +211,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Invoice'),
+        backgroundColor: Color(0xFF5469d4),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -220,8 +221,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey), // Border color
-                  borderRadius: BorderRadius.circular(8.0), // Border radius
+                  border: Theme.of(context).brightness == Brightness.light
+                      ? Border.all(color: Colors.grey.shade300) // Light theme border
+                      : Border.all(), // Dark theme border
                 ),
                 child: ListTile(
                   title: const Text('Select Customer'),
@@ -246,8 +248,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
               const SizedBox(height: 16.0),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey), // Border color
-                  borderRadius: BorderRadius.circular(8.0), // Border radius
+                  border: Theme.of(context).brightness == Brightness.light
+                      ? Border.all(color: Colors.grey.shade300) // Light theme border
+                      : Border.all(), // Dark theme border
                 ),
                 child: TextButton.icon(
                   onPressed: () {
@@ -295,7 +298,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                       decoration: InputDecoration(
                         labelText: 'Item Name',
                         filled: true,
-                        fillColor: Colors.grey[200],
+                        // fillColor: Colors.grey[200],
                       ),
                       onChanged: (value) {
                         setState(() {
@@ -308,7 +311,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                       decoration: InputDecoration(
                         labelText: 'Amount in ${selectedCurrency?.code ?? ''}',
                         filled: true,
-                        fillColor: Colors.grey[200],
+                        // fillColor: Colors.grey[200],
                       ),
                       keyboardType:
                           TextInputType.numberWithOptions(decimal: true),
@@ -323,7 +326,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                       decoration: InputDecoration(
                         labelText: 'Quantity',
                         filled: true,
-                        fillColor: Colors.grey[200],
+                        // fillColor: Colors.grey[200],
                       ),
                       keyboardType: TextInputType.number,
                       onChanged: (value) {
@@ -339,14 +342,15 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                         onPressed: () => removeItem(index),
                       ),
                     ),
-                    const Divider(color: Colors.grey),
+                    const Divider(),
                   ],
                 );
               }).toList(),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey), // Border color
-                  borderRadius: BorderRadius.circular(8.0), // Border radius
+                  border: Theme.of(context).brightness == Brightness.light
+                      ? Border.all(color: Colors.grey.shade300) // Light theme border
+                      : Border.all(), // Dark theme border
                 ),
                 child: TextButton.icon(
                   onPressed: addItem,
@@ -357,8 +361,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
               const SizedBox(height: 16.0),
               Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey), // Border color
-                    borderRadius: BorderRadius.circular(8.0), // Border radius
+                    border: Theme.of(context).brightness == Brightness.light
+                        ? Border.all(color: Colors.grey.shade300) // Light theme border
+                        : Border.all(), // Dark theme border
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
@@ -392,14 +397,15 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
               const SizedBox(height: 16.0),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey), // Border color
-                  borderRadius: BorderRadius.circular(8.0), // Border radius
+                  border: Theme.of(context).brightness == Brightness.light
+                      ? Border.all(color: Colors.grey.shade300) // Light theme border
+                      : Border.all(), // Dark theme border
                 ),
                 child: TextField(
                   controller: memoController,
                   decoration: InputDecoration(
                     labelText: 'Memo',
-                    filled: true,
+                    // filled: true,
                     border: InputBorder.none
                     // fillColor: Colors.grey[200],
                   ),
@@ -410,9 +416,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
               ElevatedButton(
                 onPressed: createInvoice,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  // backgroundColor: Colors.blue,
                   // Background color of the button
-                  foregroundColor: Colors.white,
+                  // foregroundColor: Colors.white,
                   // Text color of the button
                   padding:
                       EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),

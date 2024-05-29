@@ -89,6 +89,7 @@ class _AddCustomerScreenState extends State<CustomerDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Customer'),
+        backgroundColor: Color(0xFF5469d4),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

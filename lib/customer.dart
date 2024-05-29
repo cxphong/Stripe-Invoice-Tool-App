@@ -101,7 +101,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Customers'),
-        backgroundColor: Colors.blue[400],
+        backgroundColor: Color(0xFF5469d4),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add),
@@ -170,15 +170,22 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
                     _deleteCustomer(customer.id);
                   },
-                  child: ListTile(
-                    title: Text(decodeText(customer.name)),
-                    subtitle: Text(customer.email),
-                    onTap: () {
-                      // Return the selected customer to the previous screen
-                      if (widget.isFromAddInvoice)
-                        Navigator.pop(context, customer);
-                    },
-                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        title: Text(decodeText(customer.name)),
+                        subtitle: Text(customer.email),
+                        onTap: () {
+                          // Return the selected customer to the previous screen
+                          if (widget.isFromAddInvoice)
+                            Navigator.pop(context, customer);
+                        },
+                      ),
+                      Divider(thickness: 1,)
+                    ],
+                  ) ,
+
                 );
               } else if (_isLoading) {
                 return const Center(

@@ -98,6 +98,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Customer'),
+        backgroundColor: Color(0xFF5469d4),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -112,8 +113,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   controller: nameController,
                   decoration: InputDecoration(
                     labelText: 'Name',
-                    filled: true,
-                    border: OutlineInputBorder(),
+                    // filled: true,
+                    // border: OutlineInputBorder(),
                     // fillColor: Colors.grey[100],
                   ),
                 ),
@@ -123,8 +124,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   controller: emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
-                    filled: true,
-                    border: OutlineInputBorder(),
+                    // filled: true,
+                    // border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
@@ -143,8 +144,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   controller: descriptionController,
                   decoration: InputDecoration(
                     labelText: 'Description',
-                    filled: true,
-                    border: OutlineInputBorder(),
+                    // filled: true,
+                    // border: OutlineInputBorder(),
                   ),
                   maxLines: 3,
                 ),
@@ -188,8 +189,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   controller: addressLine1Controller,
                   decoration: InputDecoration(
                     labelText: 'Address Line 1',
-                    filled: true,
-                    border: OutlineInputBorder(),
+                    // filled: true,
+                    // border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -197,8 +198,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   controller: addressLine2Controller,
                   decoration: InputDecoration(
                     labelText: 'Address Line 2',
-                    filled: true,
-                    border: OutlineInputBorder(),
+                    // filled: true,
+                    // border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -206,8 +207,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   controller: cityController,
                   decoration: InputDecoration(
                     labelText: 'City',
-                    filled: true,
-                    border: OutlineInputBorder(),
+                    // filled: true,
+                    // border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -215,8 +216,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   controller: provinceController,
                   decoration: InputDecoration(
                     labelText: 'Province/State',
-                    filled: true,
-                    border: OutlineInputBorder(),
+                    // filled: true,
+                    // border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -224,8 +225,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   controller: postalCodeController,
                   decoration: InputDecoration(
                     labelText: 'Postal Code',
-                    filled: true,
-                    border: OutlineInputBorder(),
+                    // filled: true,
+                    // border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
                 ),
@@ -278,9 +279,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                           phone: phoneNumber != null ? phoneNumber! : "");
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    // backgroundColor: Colors.blue,
                     // Background color of the button
-                    foregroundColor: Colors.white,
+                    // foregroundColor: Colors.white,
                     // Text color of the button
                     padding:
                         EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
