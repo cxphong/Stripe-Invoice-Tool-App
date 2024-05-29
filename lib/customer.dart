@@ -95,6 +95,11 @@ class _CustomerScreenState extends State<CustomerScreen> {
     }
   }
 
+  String decodeText(String encodedText) {
+    // Decode the text using UTF-8 encoding
+    return utf8.decode(encodedText.runes.toList());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -170,7 +175,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                     _deleteCustomer(customer.id);
                   },
                   child: ListTile(
-                    title: Text(customer.name),
+                    title: Text(decodeText(customer.name)),
                     subtitle: Text(customer.email),
                     onTap: () {
                       // Return the selected customer to the previous screen

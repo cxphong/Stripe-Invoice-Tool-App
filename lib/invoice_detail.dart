@@ -31,7 +31,7 @@ class InvoiceDetailScreen extends StatelessWidget {
     }
 
     final invoiceData = json.decode(invoiceResponse.body);
-
+    print (invoiceData);
     final accountResponse = await http.get(
       Uri.parse('https://api.stripe.com/v1/account'),
       headers: {
@@ -45,7 +45,6 @@ class InvoiceDetailScreen extends StatelessWidget {
     }
 
     final accountData = json.decode(accountResponse.body);
-    print(accountData);
     return {'invoice': invoiceData, 'account': accountData};
   }
 
@@ -299,6 +298,11 @@ class InvoiceDetailScreen extends StatelessWidget {
     );
   }
 
+  String decodeText(String encodedText) {
+    // Decode the text using UTF-8 encoding
+    return utf8.decode(encodedText.runes.toList());
+  }
+
   Widget _buildLineItemsSection() {
     return Container(
       padding: EdgeInsets.all(8.0),
@@ -352,7 +356,7 @@ class InvoiceDetailScreen extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.all(8),
                       child: Text(
-                        line.description,
+                        decodeText(line.description),
                       ),
                     ),
                     Padding(
@@ -612,7 +616,7 @@ class InvoiceDetailScreen extends StatelessWidget {
                           "Finalized  invoice succeeded")));
                 } else {
                   ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text(response!.body)));
+                      .showSnackBar(SnackBar(content: Text(jsonDecode(response!.body))));
                 }
               } catch (e) {
                 ScaffoldMessenger.of(context)

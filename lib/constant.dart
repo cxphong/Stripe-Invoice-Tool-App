@@ -1,1 +1,2 @@
-const stripe_secret_key = "sk_test_51O5xFBIhRsa9dgl3u1xnl2lV2mh5L30UFrisv1PNEuGCusEolpPja0YMtmtrASfztwYTj8cM52tFmBbfI2BWoB9g00pHiff5vY";
+const stripe_secret_key = "izkisjxH8IQazZs1TG1UQTTIv8BEGS5l";
+// const stripe_secret_key = "sk_test_51O5xFBIhRsa9dgl3u1xnl2lV2mh5L30UFrisv1PNEuGCusEolpPja0YMtmtrASfztwYTj8cM52tFmBbfI2BWoB9g00pHiff5vY";

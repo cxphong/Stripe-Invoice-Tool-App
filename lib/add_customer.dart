@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:country_list_picker/country_list_picker.dart';
 import 'package:http/http.dart' as http;
@@ -24,6 +26,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   TextEditingController phoneNumberController = TextEditingController();
   final List<Countries> _countries = Countries.values.toList();
   late List<Countries> sortedCountries;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -31,7 +34,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     super.initState();
     sortedCountries = _countries.toList()
       ..sort((a, b) => a.name.compareTo(b.name));
-
   }
 
   Future<void> createStripeCustomer({
@@ -74,9 +76,17 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('Customer created successfully.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Customer created successfully.')),
+        );
       } else {
         print('Failed to create customer. Status code: ${response.statusCode}');
         print('Response body: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(
+              content: Text(jsonDecode(response.body)['error']['message'])),
+        );
       }
     } catch (e) {
       print('Error creating customer: $e');
@@ -92,160 +102,206 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Name',
-                      filled: true,
-                      fillColor: Colors.grey[100],
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    filled: true,
+                    border: OutlineInputBorder(),
+                    // fillColor: Colors.grey[100],
+                  ),
+                ),
+                SizedBox(height: 16),
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    filled: true,
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an email address';
+                    }
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
+                      return 'Please enter a valid email address';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16.0),
+                TextField(
+                  controller: descriptionController,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    filled: true,
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16.0),
+                Text(
+                  'Billing Address',
+                  style: Theme.of(context).textTheme.headline6,
+                ),
+                const SizedBox(height: 8.0),
+                DropdownButton<Countries>(
+                  isExpanded: true,
+                  value: selectedCountryCode,
+                  items: sortedCountries.map((country) {
+                    return DropdownMenuItem(
+                      value: country,
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          country.name,
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedCountryCode = value!;
+                    });
+                  },
+                ),
+                CountryListPicker(
+                  initialCountry: selectedCountryCode,
+                  isShowCountryName: true,
+                  onChanged: (value) {
+                    phoneNumber = value;
+                  },
+                  onTap: () {},
+                ),
+                const SizedBox(height: 8.0),
+                TextField(
+                  controller: addressLine1Controller,
+                  decoration: InputDecoration(
+                    labelText: 'Address Line 1',
+                    filled: true,
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                TextField(
+                  controller: addressLine2Controller,
+                  decoration: InputDecoration(
+                    labelText: 'Address Line 2',
+                    filled: true,
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                TextField(
+                  controller: cityController,
+                  decoration: InputDecoration(
+                    labelText: 'City',
+                    filled: true,
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                TextField(
+                  controller: provinceController,
+                  decoration: InputDecoration(
+                    labelText: 'Province/State',
+                    filled: true,
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                TextField(
+                  controller: postalCodeController,
+                  decoration: InputDecoration(
+                    labelText: 'Postal Code',
+                    filled: true,
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 8.0),
+                ElevatedButton(
+                  onPressed: () {
+                    // Handle form submission
+                    String name = nameController.text;
+                    String email = emailController.text;
+                    String description = descriptionController.text;
+                    String addressLine1 = addressLine1Controller.text;
+                    String addressLine2 = addressLine2Controller.text;
+                    String city = cityController.text;
+                    String province = provinceController.text;
+                    String postalCode = postalCodeController.text;
+
+                    if (name.isEmpty || email.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content:
+                                Text('Please complete all required fields.')),
+                      );
+                      return;
+                    }
+
+                    // if (_formKey.currentState!.validate()) {
+                      // Handle form submission
+                      print('name: $name');
+                      print('Email: $email');
+                      print('Description: $description');
+                      print('Address Line 1: $addressLine1');
+                      print('Address Line 2: $addressLine2');
+                      print('City: $city');
+                      print('Province: $province');
+                      print('Postal Code: $postalCode');
+                      print(
+                          'country = ' + selectedCountryCode.iso_3166_1_alpha2);
+                      // print('phone = ' + phoneNumber);
+
+                      createStripeCustomer(
+                          name: '$name',
+                          email: email,
+                          city: city,
+                          country: selectedCountryCode.iso_3166_1_alpha2,
+                          // Assuming the country is the United States, you can change it as needed
+                          addressLine1: addressLine1,
+                          addressLine2: addressLine2,
+                          postalCode: postalCode,
+                          state: province,
+                          phone: phoneNumber != null ? phoneNumber! : "");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    // Background color of the button
+                    foregroundColor: Colors.white,
+                    // Text color of the button
+                    padding:
+                        EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                    // Button padding
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(8.0), // Button border radius
+                    ),
+                    elevation: 3, // Elevation of the button
+                  ),
+                  child: Text(
+                    'Add Customer',
+                    style: TextStyle(
+                      fontSize: 16.0, // Font size of the button text
+                      fontWeight:
+                          FontWeight.bold, // Font weight of the button text
                     ),
                   ),
-                  SizedBox(height: 16),
-              const SizedBox(height: 16.0),
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  filled: true,
-                  fillColor: Colors.grey[100],
                 ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16.0),
-              TextField(
-                controller: descriptionController,
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16.0),
-              Text(
-                'Billing Address',
-                style: Theme.of(context).textTheme.headline6,
-              ),
-              const SizedBox(height: 8.0),
-              DropdownButton<Countries>(
-                isExpanded: true,
-                value: selectedCountryCode,
-                items:
-                sortedCountries.map((country) {
-                  return DropdownMenuItem(
-                    value: country,
-                    child: Container(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        country.name,
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedCountryCode = value!;
-                  });
-                },
-              ),
-              CountryListPicker(
-                initialCountry: selectedCountryCode,
-                isShowCountryName: true,
-                onChanged: (value) {
-                  phoneNumber = value;
-                },
-                onTap: () {},
-              ),
-              const SizedBox(height: 8.0),
-              TextField(
-                controller: addressLine1Controller,
-                decoration: InputDecoration(
-                  labelText: 'Address Line 1',
-                  filled: true,
-                  fillColor:  Colors.grey[100],
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              TextField(
-                controller: addressLine2Controller,
-                decoration: InputDecoration(
-                  labelText: 'Address Line 2',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              TextField(
-                controller: cityController,
-                decoration: InputDecoration(
-                  labelText: 'City',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              TextField(
-                controller: provinceController,
-                decoration: InputDecoration(
-                  labelText: 'Province',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              TextField(
-                controller: postalCodeController,
-                decoration: InputDecoration(
-                  labelText: 'Postal Code',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 8.0),
-              ElevatedButton(
-                onPressed: () {
-                  // Handle form submission
-                  String name = nameController.text;
-                  String email = emailController.text;
-                  String description = descriptionController.text;
-                  String addressLine1 = addressLine1Controller.text;
-                  String addressLine2 = addressLine2Controller.text;
-                  String city = cityController.text;
-                  String province = provinceController.text;
-                  String postalCode = postalCodeController.text;
-
-                  // Handle form submission
-                  print('name: $name');
-                  print('Email: $email');
-                  print('Description: $description');
-                  print('Address Line 1: $addressLine1');
-                  print('Address Line 2: $addressLine2');
-                  print('City: $city');
-                  print('Province: $province');
-                  print('Postal Code: $postalCode');
-                  print('country = ' + selectedCountryCode.iso_3166_1_alpha2);
-                  print('phone = ' + phoneNumber!);
-
-                  createStripeCustomer(
-                    name: '$name',
-                    email: email,
-                    city: city,
-                    country: selectedCountryCode.iso_3166_1_alpha2, // Assuming the country is the United States, you can change it as needed
-                    addressLine1: addressLine1,
-                    addressLine2: addressLine2,
-                    postalCode: postalCode,
-                    state: province,
-                    phone: phoneNumber!
-                  );
-                },
-                child: const Text('Add Customer'),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

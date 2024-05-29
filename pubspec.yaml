@@ -45,6 +45,7 @@ dependencies:
   url_launcher: ^6.2.6
   pdf: ^3.10.8
   printing: ^5.12.0
+  currency_picker: ^2.0.21
 
 
 dev_dependencies:

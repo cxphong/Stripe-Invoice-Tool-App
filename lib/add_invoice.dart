@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/customer.dart';
 import 'package:stripe_invoice/constant.dart';
+import 'package:currency_picker/currency_picker.dart';
+import 'package:intl/intl.dart';
 
 class Item {
   String name;
@@ -25,7 +27,9 @@ class AddInvoiceScreen extends StatefulWidget {
 
 class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
   Customer? selectedCustomer;
-  String currency = 'USD';
+  Currency? selectedCurrency;
+  int selectedDate = -1;
+
   final List<String> dueDaysOptions = [
     'Today',
     'Tomorrow',
@@ -34,11 +38,18 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
     '30 Days',
     '45 Days',
     '60 Days',
-    '90 Days'
+    '90 Days',
   ];
-  String? selectedDueDay;
+  late String selectedDueDay;
   final List<Item> items = [];
   final TextEditingController memoController = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    selectedDueDay = dueDaysOptions.first;
+  }
 
   void addItem() {
     setState(() {
@@ -52,9 +63,44 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
     });
   }
 
+  void _selectDate() async {
+    final DateTime now = DateTime.now();
+    final DateTime today = DateTime(now.year, now.month, now.day);
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(Duration(days: 365)),
+    );
+
+    if (pickedDate != null) {
+      final DateTime pickedDateMidnight =
+          DateTime(pickedDate.year, pickedDate.month, pickedDate.day);
+      final difference = pickedDateMidnight.difference(today);
+      print(difference.inDays);
+
+      if (difference.inDays == 0) {
+        setState(() {
+          selectedDueDay = "Today";
+        });
+      } else if (difference.inDays == 1) {
+        setState(() {
+          selectedDueDay = "Tomorrow";
+        });
+      } else {
+        setState(() {
+          selectedDate = difference.inDays;
+        });
+      }
+    }
+  }
 
   Future<void> createInvoice() async {
-    if (selectedCustomer == null || selectedDueDay == null || items.isEmpty) {
+    if (selectedCustomer == null ||
+        selectedDueDay == null ||
+        items.isEmpty ||
+        selectedCurrency == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please complete all required fields.')),
       );
@@ -72,7 +118,8 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
       '90 Days': 90,
     };
 
-    final dueDate = DateTime.now().add(Duration(days: dueDaysMap[selectedDueDay]!));
+    final dueDate =
+        DateTime.now().add(Duration(days: dueDaysMap[selectedDueDay]!));
 
     // Step 1: Create Invoice
     final invoiceResponse = await http.post(
@@ -84,15 +131,21 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
       body: {
         'customer': selectedCustomer!.id,
         'description': memoController.text,
-        'currency': currency,
-        'due_date': (dueDate.millisecondsSinceEpoch / 1000).round().toString(), // Unix timestamp in seconds
+        'currency': selectedCurrency!.code,
+        'due_date': (dueDate.millisecondsSinceEpoch / 1000)
+            .round()
+            .toString(), // Unix timestamp in seconds
         'collection_method': 'send_invoice',
+        'pending_invoice_items_behavior': 'exclude'
       },
     );
 
     if (invoiceResponse.statusCode != 200) {
+      print(invoiceResponse.body);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create invoice: ${invoiceResponse.statusCode}')),
+        SnackBar(
+            content: Text(
+                'Failed to create invoice: ${invoiceResponse.statusCode}')),
       );
       return;
     }
@@ -110,8 +163,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
         },
         body: {
           'customer': selectedCustomer!.id,
-          'unit_amount': (item.amount * 100).toInt().toString(), // Amount in cents
-          'currency': currency,
+          'unit_amount':
+              (item.amount * 100).toInt().toString(), // Amount in cents
+          'currency': selectedCurrency!.code,
           'description': item.name,
           'quantity': item.quantity.toString(),
           'invoice': invoiceId,
@@ -121,7 +175,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
       if (response.statusCode != 200) {
         print(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create invoice item: ${response.statusCode}')),
+          SnackBar(
+              content: Text(
+                  'Failed to create invoice item: ${response.statusCode}')),
         );
         return;
       }
@@ -138,11 +194,14 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
 
     if (finalizeResponse.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invoice created and finalized successfully.')),
+        const SnackBar(
+            content: Text('Invoice created and finalized successfully.')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to finalize invoice: ${finalizeResponse.statusCode}')),
+        SnackBar(
+            content: Text(
+                'Failed to finalize invoice: ${finalizeResponse.statusCode}')),
       );
     }
   }
@@ -159,39 +218,67 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ListTile(
-                title: const Text('Select Customer'),
-                subtitle: Text(selectedCustomer != null
-                    ? selectedCustomer!.name
-                    : 'No customer selected'),
-                onTap: () async {
-                  final result = await Navigator.push<Customer>(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CustomerScreen(isFromAddInvoice: true)),
-                  );
-                  if (result != null) {
-                    setState(() {
-                      selectedCustomer = result;
-                    });
-                  }
-                },
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey), // Border color
+                  borderRadius: BorderRadius.circular(8.0), // Border radius
+                ),
+                child: ListTile(
+                  title: const Text('Select Customer'),
+                  subtitle: Text(selectedCustomer != null
+                      ? selectedCustomer!.name
+                      : 'No customer selected'),
+                  onTap: () async {
+                    final result = await Navigator.push<Customer>(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const CustomerScreen(isFromAddInvoice: true)),
+                    );
+                    if (result != null) {
+                      setState(() {
+                        selectedCustomer = result;
+                      });
+                    }
+                  },
+                ),
               ),
               const SizedBox(height: 16.0),
-              DropdownButtonFormField<String>(
-                value: currency,
-                decoration: const InputDecoration(labelText: 'Currency'),
-                items: <String>['USD', 'EUR', 'GBP'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    currency = newValue!;
-                  });
-                },
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey), // Border color
+                  borderRadius: BorderRadius.circular(8.0), // Border radius
+                ),
+                child: TextButton.icon(
+                  onPressed: () {
+                    showCurrencyPicker(
+                      context: context,
+                      showFlag: true,
+                      showSearchField: true,
+                      showCurrencyName: true,
+                      showCurrencyCode: true,
+                      onSelect: (Currency currency) {
+                        setState(() {
+                          selectedCurrency = currency;
+                        });
+                      },
+                    );
+                  },
+                  icon: Icon(Icons.arrow_drop_down),
+                  label: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    // Aligns the icon and text to the left
+                    children: [
+                      Text(
+                        selectedCurrency != null
+                            ? selectedCurrency!.name +
+                                " - " +
+                                selectedCurrency!.code
+                            : "Select currency",
+                      ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 16.0),
               const Text(
@@ -219,11 +306,12 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                     const SizedBox(height: 8.0),
                     TextField(
                       decoration: InputDecoration(
-                        labelText: 'Amount in $currency',
+                        labelText: 'Amount in ${selectedCurrency?.code ?? ''}',
                         filled: true,
                         fillColor: Colors.grey[200],
                       ),
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
                       onChanged: (value) {
                         setState(() {
                           item.amount = double.tryParse(value) ?? 0.0;
@@ -255,41 +343,94 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                   ],
                 );
               }).toList(),
-              TextButton.icon(
-                onPressed: addItem,
-                icon: const Icon(Icons.add),
-                label: const Text('Add Item'),
-              ),
-              const SizedBox(height: 16.0),
-              DropdownButtonFormField<String>(
-                value: selectedDueDay,
-                decoration: const InputDecoration(labelText: 'Due Days'),
-                items: dueDaysOptions.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedDueDay = newValue!;
-                  });
-                },
-              ),
-              const SizedBox(height: 16.0),
-              TextField(
-                controller: memoController,
-                decoration: InputDecoration(
-                  labelText: 'Memo',
-                  filled: true,
-                  fillColor: Colors.grey[200],
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey), // Border color
+                  borderRadius: BorderRadius.circular(8.0), // Border radius
                 ),
-                maxLines: 3,
+                child: TextButton.icon(
+                  onPressed: addItem,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Item'),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey), // Border color
+                    borderRadius: BorderRadius.circular(8.0), // Border radius
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: DropdownButtonFormField<String>(
+                      value: selectedDueDay,
+                      decoration: const InputDecoration(labelText: 'Due Days'),
+                      items: [
+                        ...dueDaysOptions.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }),
+                        // DropdownMenuItem(
+                        //   value: 'Other',
+                        //   child: Text('Other'),
+                        // ),
+                      ],
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          // if (newValue == 'Other') {
+                          //   _selectDate();
+                          // } else {
+                            selectedDueDay = newValue!;
+                            // selectedDate = -1;
+                          // }
+                        });
+                      },
+                    ),
+                  )),
+              const SizedBox(height: 16.0),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey), // Border color
+                  borderRadius: BorderRadius.circular(8.0), // Border radius
+                ),
+                child: TextField(
+                  controller: memoController,
+                  decoration: InputDecoration(
+                    labelText: 'Memo',
+                    filled: true,
+                    border: InputBorder.none
+                    // fillColor: Colors.grey[200],
+                  ),
+                  maxLines: 3,
+                ),
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: createInvoice,
-                child: const Text('Add Invoice'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  // Background color of the button
+                  foregroundColor: Colors.white,
+                  // Text color of the button
+                  padding:
+                      EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                  // Button padding
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(8.0), // Button border radius
+                  ),
+                  elevation: 3, // Elevation of the button
+                ),
+                child: Text(
+                  'Add Invoice',
+                  style: TextStyle(
+                    fontSize: 16.0, // Font size of the button text
+                    fontWeight:
+                        FontWeight.bold, // Font weight of the button text
+                  ),
+                ),
               ),
             ],
           ),
