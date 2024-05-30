@@ -5,16 +5,19 @@ import 'package:stripe_invoice/customer.dart';
 import 'package:stripe_invoice/constant.dart';
 import 'package:currency_picker/currency_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:stripe_invoice/taxrate.dart';
 
 class Item {
   String name;
   double amount;
   int quantity;
+  TaxRate? taxRate;
 
   Item({
     required this.name,
     required this.amount,
     required this.quantity,
+    required this.taxRate
   });
 }
 
@@ -43,6 +46,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
   late String selectedDueDay;
   final List<Item> items = [];
   final TextEditingController memoController = TextEditingController();
+  TaxRate? selectedInvoiceTaxRate;
 
   @override
   void initState() {
@@ -53,7 +57,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
 
   void addItem() {
     setState(() {
-      items.add(Item(name: '', amount: 0.0, quantity: 1));
+      items.add(Item(name: '', amount: 0.0, quantity: 1, taxRate: null));
     });
   }
 
@@ -136,10 +140,13 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
             .round()
             .toString(), // Unix timestamp in seconds
         'collection_method': 'send_invoice',
-        'pending_invoice_items_behavior': 'exclude'
+        'pending_invoice_items_behavior': 'exclude',
+        if (selectedInvoiceTaxRate != null)
+          'default_tax_rates[]': selectedInvoiceTaxRate!.id,
       },
     );
 
+    print(invoiceResponse.body);
     if (invoiceResponse.statusCode != 200) {
       print(invoiceResponse.body);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -169,6 +176,8 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
           'description': item.name,
           'quantity': item.quantity.toString(),
           'invoice': invoiceId,
+          if (item.taxRate != null)
+            'tax_rates[]': item.taxRate!.id,
         },
       );
 
@@ -203,6 +212,30 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
             content: Text(
                 'Failed to finalize invoice: ${finalizeResponse.statusCode}')),
       );
+    }
+  }
+
+  Future<void> _selectTaxRate(Item item, int index) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TaxRateScreen(selectMode: true)),
+    );
+    if (result != null && result is TaxRate) {
+      setState(() {
+        items[index].taxRate = result;
+      });
+    }
+  }
+
+  Future<void> _selectTaxRateForInvoice() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TaxRateScreen(selectMode: true)),
+    );
+    if (result != null && result is TaxRate) {
+      setState(() {
+        selectedInvoiceTaxRate = result;
+      });
     }
   }
 
@@ -297,7 +330,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                     TextField(
                       decoration: InputDecoration(
                         labelText: 'Item Name',
-                        filled: true,
+                        // filled: true,
                         // fillColor: Colors.grey[200],
                       ),
                       onChanged: (value) {
@@ -310,7 +343,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                     TextField(
                       decoration: InputDecoration(
                         labelText: 'Amount in ${selectedCurrency?.code ?? ''}',
-                        filled: true,
+                        // filled: true,
                         // fillColor: Colors.grey[200],
                       ),
                       keyboardType:
@@ -325,7 +358,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                     TextField(
                       decoration: InputDecoration(
                         labelText: 'Quantity',
-                        filled: true,
+                        // filled: true,
                         // fillColor: Colors.grey[200],
                       ),
                       keyboardType: TextInputType.number,
@@ -334,6 +367,14 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                           item.quantity = int.tryParse(value) ?? 1;
                         });
                       },
+                    ),
+                    ListTile(
+                      title: Text('Select Tax Rate'),
+                      subtitle: Text(item.taxRate != null
+                          ? '${item.taxRate!.displayName} - ${item.taxRate!.percentage}%'
+                          : 'None'),
+                      trailing: Icon(Icons.arrow_drop_down),
+                      onTap: () => _selectTaxRate(item, index),
                     ),
                     Align(
                       alignment: Alignment.centerRight,
@@ -395,6 +436,21 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                     ),
                   )),
               const SizedBox(height: 16.0),
+              Container(
+                decoration: BoxDecoration(
+                  border: Theme.of(context).brightness == Brightness.light
+                      ? Border.all(color: Colors.grey.shade300) // Light theme border
+                      : Border.all(), // Dark theme border
+                ),
+                child: ListTile(
+                  title: const Text('Select Tax Rate for Invoice'),
+                  subtitle: Text(selectedInvoiceTaxRate != null
+                      ? '${selectedInvoiceTaxRate!.displayName} - ${selectedInvoiceTaxRate!.percentage}%'
+                      : 'None'),
+                  trailing: Icon(Icons.arrow_drop_down),
+                  onTap: _selectTaxRateForInvoice,
+                ),
+              ),
               Container(
                 decoration: BoxDecoration(
                   border: Theme.of(context).brightness == Brightness.light

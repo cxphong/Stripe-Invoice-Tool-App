@@ -4,6 +4,7 @@ import 'package:stripe_invoice/invoice.dart';
 import 'package:stripe_invoice/product.dart';
 import 'package:stripe_invoice/settings.dart';
 import 'package:provider/provider.dart';
+import 'package:stripe_invoice/taxrate.dart';
 
 void main() {
   runApp(
@@ -84,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.school),
-              label: 'Product',
+              label: 'Taxrate',
             ),
           ],
           currentIndex: _selectedIndex,
@@ -100,5 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
 final List<Widget> _screens = <Widget>[
   InvoiceScreen(),
   CustomerScreen(),
-  ProductScreen(),
+  TaxRateScreen(),
+
 ];
