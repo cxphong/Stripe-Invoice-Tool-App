@@ -1,12 +1,9 @@
-// tax_rate_screen.dart
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/add_tax_rate.dart';
 import 'package:stripe_invoice/constant.dart';
-
-// tax_rate.dart
+import 'package:stripe_invoice/data.dart';
 
 class TaxRate {
   final String id;
@@ -39,7 +36,8 @@ class TaxRate {
 
 class TaxRateScreen extends StatefulWidget {
   final bool selectMode;
-  const TaxRateScreen({Key? key, this.selectMode = false}) : super(key: key);
+
+  TaxRateScreen({Key? key, this.selectMode = false}) : super(key: key);
 
   @override
   State<TaxRateScreen> createState() => _TaxRateScreenState();
@@ -50,6 +48,7 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
   bool _isLoading = false;
   bool _hasMore = true;
   int _currentPage = 1;
+  SharedData sharedData = SharedData();
 
   @override
   void initState() {
@@ -64,9 +63,11 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
       final response = await http.get(
         Uri.https('api.stripe.com', '/v1/tax_rates', {
           'limit': '10',
-          'starting_after': isRefreshing ? '' : (_taxRates.isNotEmpty ? _taxRates.last.id : '')
+          'starting_after': isRefreshing
+              ? ''
+              : (_taxRates.isNotEmpty ? _taxRates.last.id : '')
         }),
-        headers: {'Authorization': 'Bearer ${stripe_secret_key}'},
+        headers: {'Authorization': 'Bearer ${sharedData.stripe_access_key}'},
       );
 
       if (response.statusCode == 200) {
@@ -76,8 +77,10 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
           if (isRefreshing) {
             _taxRates.clear();
           }
-          _taxRates.addAll(
-              taxRatesData.map((data) => TaxRate.fromJson(data)).where((taxRate) => taxRate.active).toList());
+          _taxRates.addAll(taxRatesData
+              .map((data) => TaxRate.fromJson(data))
+              .where((taxRate) => taxRate.active)
+              .toList());
           _hasMore = jsonData['has_more'];
           _currentPage++;
         });
@@ -97,7 +100,7 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
     final response = await http.post(
       Uri.https('api.stripe.com', '/v1/tax_rates/$id'),
       headers: {
-        'Authorization': 'Bearer ${stripe_secret_key}',
+        'Authorization': 'Bearer ${sharedData.stripe_access_key}',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: {'active': 'false'},
@@ -136,7 +139,6 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
             },
           ),
         ],
-
       ),
       body: _taxRates.isEmpty
           ? Center(
@@ -146,7 +148,10 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
       )
           : NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification scrollInfo) {
-          if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent && _hasMore && !_isLoading) {
+          if (scrollInfo.metrics.pixels ==
+              scrollInfo.metrics.maxScrollExtent &&
+              _hasMore &&
+              !_isLoading) {
             _fetchTaxRates();
           }
           return false;
@@ -162,17 +167,31 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
                 );
               }
               final taxRate = _taxRates[index];
-              return ListTile(
-                title: Text(taxRate.displayName),
-                subtitle: Text('${taxRate.taxType} - ${taxRate.percentage}%'),
-                trailing: Text(taxRate.inclusive
-                    ? "Inclusive"
-                    : "Exclusive"),
-                onTap: widget.selectMode
-                    ? () {
-                  Navigator.pop(context, taxRate);
-                }
-                    : null,
+              return Dismissible(
+                key: Key(taxRate.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Icon(
+                    Icons.archive,
+                    color: Colors.white,
+                  ),
+                ),
+                onDismissed: (direction) {
+                  _archiveTaxRate(taxRate.id);
+                },
+                child: ListTile(
+                  title: Text(taxRate.displayName),
+                  subtitle: Text('${taxRate.taxType} - ${taxRate.percentage}%'),
+                  trailing: Text(taxRate.inclusive ? "Inclusive" : "Exclusive"),
+                  onTap: widget.selectMode
+                      ? () {
+                    Navigator.pop(context, taxRate);
+                  }
+                      : null,
+                ),
               );
             },
           ),
@@ -181,4 +200,3 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
     );
   }
 }
-

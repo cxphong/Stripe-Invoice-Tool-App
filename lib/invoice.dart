@@ -9,9 +9,10 @@ import 'package:stripe_invoice/constant.dart';
 import 'package:stripe_invoice/custom_appbar.dart';
 import 'package:stripe_invoice/settings-page.dart';
 import 'package:stripe_invoice/settings.dart';
+import 'package:stripe_invoice/data.dart';
 
 class LineItem {
-  final String description;
+  final String? description;
   final int quantity;
   final double unitPrice;
   final double amount;
@@ -90,6 +91,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   int _currentPage = 1;
   bool _isLoading = false;
   bool _hasMore = true;
+  SharedData sharedData = SharedData();
 
   @override
   void initState() {
@@ -108,10 +110,11 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
           'limit': '10',
           'starting_after':isRefreshing ? '' : (_invoices.isNotEmpty ? _invoices.last.id : '')
         }),
-        headers: {'Authorization': 'Bearer ${stripe_secret_key}'},
+        headers: {'Authorization': 'Bearer ${sharedData.stripe_access_key}'},
       );
 
       if (response.statusCode == 200) {
+        print (response.body);
         final jsonData = jsonDecode(response.body);
         final List<dynamic> invoicesData = jsonData['data'];
         setState(() {
@@ -170,7 +173,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       ),
       body: _invoices.isEmpty
           ? const Center(
-              child: CircularProgressIndicator(),
+              child: Text("No invoice data"),
             )
           : NotificationListener<ScrollNotification>(
                 onNotification: (ScrollNotification scrollInfo) {

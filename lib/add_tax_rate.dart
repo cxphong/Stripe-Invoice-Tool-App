@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/constant.dart';
+import 'package:stripe_invoice/data.dart';
 
 class AddTaxRateScreen extends StatefulWidget {
   const AddTaxRateScreen({Key? key}) : super(key: key);
@@ -18,6 +19,7 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
   double _percentage = 0;
   bool _inclusive = false;
   String? _selectedTaxType;
+  SharedData sharedData = SharedData();
 
   final List<Map<String, String>> _taxTypes = [
     {'value': 'gst', 'label': 'Goods and Services Tax'},
@@ -32,7 +34,7 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
       final response = await http.post(
         Uri.https('api.stripe.com', '/v1/tax_rates'),
         headers: {
-          'Authorization': 'Bearer ${stripe_secret_key}',
+          'Authorization': 'Bearer ${sharedData.stripe_access_key}',
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: {

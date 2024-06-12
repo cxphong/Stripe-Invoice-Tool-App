@@ -6,6 +6,7 @@ import 'package:stripe_invoice/constant.dart';
 import 'package:currency_picker/currency_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:stripe_invoice/taxrate.dart';
+import 'package:stripe_invoice/data.dart';
 
 class Item {
   String name;
@@ -32,6 +33,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
   Customer? selectedCustomer;
   Currency? selectedCurrency;
   int selectedDate = -1;
+  SharedData sharedData = SharedData();
 
   final List<String> dueDaysOptions = [
     'Today',
@@ -129,7 +131,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
     final invoiceResponse = await http.post(
       Uri.https('api.stripe.com', '/v1/invoices'),
       headers: {
-        'Authorization': 'Bearer ${stripe_secret_key}',
+        'Authorization': 'Bearer ${sharedData.stripe_access_key}',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: {
@@ -165,7 +167,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
       final response = await http.post(
         Uri.https('api.stripe.com', '/v1/invoiceitems'),
         headers: {
-          'Authorization': 'Bearer ${stripe_secret_key}',
+          'Authorization': 'Bearer ${sharedData.stripe_access_key}',
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: {
@@ -196,7 +198,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
     final finalizeResponse = await http.post(
       Uri.https('api.stripe.com', '/v1/invoices/$invoiceId/finalize'),
       headers: {
-        'Authorization': 'Bearer ${stripe_secret_key}',
+        'Authorization': 'Bearer ${sharedData.stripe_access_key}',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     );

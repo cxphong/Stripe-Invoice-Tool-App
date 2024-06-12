@@ -1,106 +1,136 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:stripe_invoice/customer.dart';
-import 'package:stripe_invoice/invoice.dart';
-import 'package:stripe_invoice/product.dart';
+import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:stripe_invoice/settings.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:uni_links/uni_links.dart';
+import 'package:stripe_invoice/data.dart';
 import 'package:provider/provider.dart';
-import 'package:stripe_invoice/taxrate.dart';
+
+import 'apps.dart';
 
 void main() {
   runApp(
     ChangeNotifierProvider(
       create: (_) => SettingsProvider(),
-      child: MyApp(),
+      child: ConnectPage(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class ConnectPage extends StatelessWidget {
+  const ConnectPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child)
-    {
-      return MaterialApp(
-        title: 'Flutter Demo',
-        home: const MyHomePage(),
-        theme: ThemeData.light(),
-        darkTheme: ThemeData.dark(),
-        themeMode: settingsProvider.themeMode,
-      );
-    });
+        {
+          return MaterialApp(
+            title: 'Flutter Demo',
+            home:  const _ConnectPage(),
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            themeMode: settingsProvider.themeMode,
+          );
+        });
 
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+class _ConnectPage extends StatefulWidget {
+  const _ConnectPage({Key? key}) : super(key: key);
+  _ConnectPageState createState() => _ConnectPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
+class _ConnectPageState extends State<_ConnectPage> {
+  StreamSubscription? _sub;
+  SharedData sharedData = SharedData();
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  void _launchURL() async {
+    const url = 'https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QGyQGNJXP9thoJSAjHI6qrJVsdmXGSFy&scope=read_write';
+
+    // Start the authentication flow
+    final result = await FlutterWebAuth.authenticate(
+      url: url,
+      callbackUrlScheme: "myapp",
+    );
+
+    final uri = Uri.parse(result);
+    final accessToken = uri.queryParameters['access_token'];
+
+    // Extract the authorization code from the result URL
+    // final access_key = Uri.parse(result).queryParameters['access_key'];
+    print (accessToken);
+    sharedData.stripe_access_key = accessToken!;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MyHomePage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('BottomNavigationBar Sample'),
-      // ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: Container(
-        // decoration: BoxDecoration(
-        //   boxShadow: [
-        //     BoxShadow(
-        //       color: Colors.grey.withOpacity(0.2), // Shadow color
-        //       spreadRadius: 4, // Spread radius
-        //       blurRadius: 4, // Blur radius
-        //       // offset: Offset(0, 0), // Offset in the negative Y direction
-        //     ),
-        //   ],
-        // ),
-        child: BottomNavigationBar(
-          // backgroundColor: ThemeData.light(),
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.edit_document),
-              label: 'Invoice',
+      body: Container(
+        width: double.infinity, // Ensures the container takes up the full width
+        color: Colors.blue,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Spacer(),
+            Text(
+              'Swipe',
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.people),
-              label: 'Customer',
+            SizedBox(height: 10),
+            Text(
+              'Payments for Stripe',
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.school),
-              label: 'Taxrate',
+            SizedBox(height: 30),
+            Icon(
+              Icons.credit_card,
+              size: 100,
+              color: Colors.white,
             ),
+            SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {_launchURL();},
+              // style: ElevatedButton.styleFrom(
+              //   primary: Colors.white,
+              //   onPrimary: Colors.blue,
+              // ),
+              child: Text(
+                'Connect with Stripe',
+                style: TextStyle(color: Colors.blue),
+              ),
+            ),
+            SizedBox(height: 10),
+            TextButton(
+              onPressed: () {},
+              child: Text(
+                'Create Stripe Account',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Spacer(),
           ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Color(0xFF5469d4),
-          onTap: _onItemTapped,
         ),
       ),
     );
   }
-
 }
-
-final List<Widget> _screens = <Widget>[
-  InvoiceScreen(),
-  CustomerScreen(),
-  TaxRateScreen(),
-
-];

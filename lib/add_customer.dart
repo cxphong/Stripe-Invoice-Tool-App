@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:country_list_picker/country_list_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/constant.dart';
+import 'package:stripe_invoice/data.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({Key? key}) : super(key: key);
@@ -27,6 +28,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final List<Countries> _countries = Countries.values.toList();
   late List<Countries> sortedCountries;
   final _formKey = GlobalKey<FormState>();
+  SharedData sharedData = SharedData();
 
   @override
   void initState() {
@@ -68,7 +70,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       final response = await http.post(
         Uri.parse('https://api.stripe.com/v1/customers'),
         headers: {
-          'Authorization': 'Bearer ${stripe_secret_key}',
+          'Authorization': 'Bearer ${sharedData.stripe_access_key}',
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: requestBody,

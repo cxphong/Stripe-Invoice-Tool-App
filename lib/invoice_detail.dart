@@ -12,11 +12,13 @@ import 'package:printing/printing.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:stripe_invoice/utils.dart';
+import 'package:stripe_invoice/data.dart';
 
 class InvoiceDetailScreen extends StatelessWidget {
   final Invoice invoice;
+  final SharedData sharedData = SharedData();
 
-  const InvoiceDetailScreen({Key? key, required this.invoice})
+  InvoiceDetailScreen({Key? key, required this.invoice})
       : super(key: key);
 
   void showProgress(BuildContext context) {
@@ -69,7 +71,7 @@ class InvoiceDetailScreen extends StatelessWidget {
       final response = await http.delete(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer $stripe_secret_key',
+          'Authorization': 'Bearer ${sharedData.stripe_access_key}',
         },
       );
 
@@ -87,7 +89,7 @@ class InvoiceDetailScreen extends StatelessWidget {
       final response = await http.post(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer $stripe_secret_key',
+          'Authorization': 'Bearer ${sharedData.stripe_access_key}',
         },
       );
       return response;
@@ -104,7 +106,7 @@ class InvoiceDetailScreen extends StatelessWidget {
       final response = await http.post(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer $stripe_secret_key',
+          'Authorization': 'Bearer ${sharedData.stripe_access_key}',
         },
       );
 
@@ -123,7 +125,7 @@ class InvoiceDetailScreen extends StatelessWidget {
       final response = await http.post(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer $stripe_secret_key',
+          'Authorization': 'Bearer ${sharedData.stripe_access_key}',
         },
       );
       return response;
@@ -140,7 +142,7 @@ class InvoiceDetailScreen extends StatelessWidget {
       final response = await http.post(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer $stripe_secret_key',
+          'Authorization': 'Bearer ${sharedData.stripe_access_key}',
         },
       );
       return response;
@@ -229,7 +231,7 @@ class InvoiceDetailScreen extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.all(8),
                       child: Text(
-                        decodeText(line.description),
+                        decodeText(line.description != null ? line.description! : ""),
                       ),
                     ),
                     Padding(

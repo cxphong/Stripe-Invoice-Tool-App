@@ -3,27 +3,54 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/add_customer.dart';
 import 'package:stripe_invoice/constant.dart';
+import 'package:stripe_invoice/customer_detail.dart';
 import 'package:stripe_invoice/utils.dart';
+import 'package:stripe_invoice/data.dart';
 
 class Customer {
   final String id;
   final String name;
   final String email;
+  final String? description;
+  final String? addressLine1;
+  final String? addressLine2;
+  final String? city;
+  final String? state;
+  final String? postalCode;
+  final String? country;
+  final String? phone;
 
   Customer({
     required this.id,
     required this.name,
     required this.email,
+    this.description,
+    this.addressLine1,
+    this.addressLine2,
+    this.city,
+    this.state,
+    this.postalCode,
+    this.country,
+    this.phone,
   });
 
   factory Customer.fromJson(Map<String, dynamic> json) {
     return Customer(
       id: json['id'],
-      name: json['name'],
-      email: json['email'],
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      description: json['description'],
+      addressLine1: json['address'] != null ? json['address']['line1'] : null,
+      addressLine2: json['address'] != null ? json['address']['line2'] : null,
+      city: json['address'] != null ? json['address']['city'] : null,
+      state: json['address'] != null ? json['address']['state'] : null,
+      postalCode: json['address'] != null ? json['address']['postal_code'] : null,
+      country: json['address'] != null ? json['address']['country'] : null,
+      phone: json['phone'],
     );
   }
 }
+
 
 class CustomerScreen extends StatefulWidget {
   final bool isFromAddInvoice;
@@ -39,6 +66,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
   List<Customer> _customers = [];
   bool _isLoading = false;
   bool _hasMore = true;
+  SharedData sharedData = SharedData();
 
   @override
   void initState() {
@@ -62,7 +90,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
           'limit': '$limit',
           if (!refresh) 'starting_after': startingAfter,
         }),
-        headers: {'Authorization': 'Bearer ${stripe_secret_key}'},
+        headers: {'Authorization': 'Bearer ${sharedData.stripe_access_key}'},
       );
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
@@ -85,7 +113,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
   Future<void> _deleteCustomer(String customerId) async {
     final response = await http.delete(
       Uri.https('api.stripe.com', '/v1/customers/$customerId'),
-      headers: {'Authorization': 'Bearer ${stripe_secret_key}'},
+      headers: {'Authorization': 'Bearer ${sharedData.stripe_access_key}'},
     );
     print(response.body);
     if (response.statusCode == 200) {
@@ -116,7 +144,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
       ),
       body: _customers.isEmpty
             ? const Center(
-          child: CircularProgressIndicator(),
+          child: Text("No customer data"),
         )
             : NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {
@@ -178,8 +206,17 @@ class _CustomerScreenState extends State<CustomerScreen> {
                         subtitle: Text(customer.email),
                         onTap: () {
                           // Return the selected customer to the previous screen
-                          if (widget.isFromAddInvoice)
+                          if (widget.isFromAddInvoice) {
                             Navigator.pop(context, customer);
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DetailCustomerScreen(customer: customer),
+                              ),
+                            ).then((value) => _fetchCustomers(refresh: true));
+                          }
                         },
                       ),
                       Divider(thickness: 1,)
