@@ -9,7 +9,10 @@ import 'package:provider/provider.dart';
 
 import 'apps.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedData().loadStripeAccessKey();
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => SettingsProvider(),
@@ -19,7 +22,8 @@ void main() {
 }
 
 class ConnectPage extends StatelessWidget {
-  const ConnectPage({Key? key}) : super(key: key);
+  ConnectPage({Key? key}) : super(key: key);
+  SharedData sharedData = SharedData();
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +32,7 @@ class ConnectPage extends StatelessWidget {
         {
           return MaterialApp(
             title: 'Flutter Demo',
-            home:  const _ConnectPage(),
+            home:  sharedData.stripe_access_key.isEmpty ?  _ConnectPage() : MyHomePage(),
             theme: ThemeData.light(),
             darkTheme: ThemeData.dark(),
             themeMode: settingsProvider.themeMode,
@@ -68,7 +72,7 @@ class _ConnectPageState extends State<_ConnectPage> {
     // Extract the authorization code from the result URL
     // final access_key = Uri.parse(result).queryParameters['access_key'];
     print (accessToken);
-    sharedData.stripe_access_key = accessToken!;
+    await sharedData.saveStripeAccessKey(accessToken!);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => MyHomePage()),
@@ -86,7 +90,7 @@ class _ConnectPageState extends State<_ConnectPage> {
           children: [
             Spacer(),
             Text(
-              'Swipe',
+              'Infinium',
               style: TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
@@ -119,14 +123,7 @@ class _ConnectPageState extends State<_ConnectPage> {
                 style: TextStyle(color: Colors.blue),
               ),
             ),
-            SizedBox(height: 10),
-            TextButton(
-              onPressed: () {},
-              child: Text(
-                'Create Stripe Account',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+
             Spacer(),
           ],
         ),

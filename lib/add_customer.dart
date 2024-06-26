@@ -151,7 +151,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   ),
                   maxLines: 3,
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 48.0),
                 Text(
                   'Billing Address',
                   style: Theme.of(context).textTheme.headline6,
@@ -178,13 +178,14 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     });
                   },
                 ),
+                const SizedBox(height: 8.0),
                 CountryListPicker(
                   initialCountry: selectedCountryCode,
-                  isShowCountryName: true,
+                  isShowCountryName: false,
                   onChanged: (value) {
                     phoneNumber = value;
                   },
-                  onTap: () {},
+                  // onTap: () {},
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
@@ -230,7 +231,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     // filled: true,
                     // border: OutlineInputBorder(),
                   ),
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 8.0),
                 ElevatedButton(

@@ -6,6 +6,8 @@ import 'package:stripe_invoice/constant.dart';
 import 'package:stripe_invoice/payment.dart';
 import 'package:stripe_invoice/scan_credit_card.dart';
 import 'package:stripe_invoice/data.dart';
+import 'package:stripe_invoice/settings-page.dart';
+import 'package:stripe_invoice/stripe.dart';
 
 class PaymentIntent {
   final String id;
@@ -98,6 +100,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
       appBar: AppBar(
         title: const Text('Payments'),
         backgroundColor: Color(0xFF5469d4),
+        leading: IconButton(
+          icon: Icon(Icons.settings),
+          onPressed: () {
+            // Handle settings button press
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsPage()),
+            );
+          },
+        ),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add),
@@ -105,14 +117,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => CreditCardScanScreen()));
+                      builder: (context) => CreateStripePayment()));
             },
           ),
         ],
       ),
       body: _paymentIntents.isEmpty
           ? const Center(
-              child: CircularProgressIndicator(),
+              child: Text("No payment data"),
             )
           : NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification scrollInfo) {

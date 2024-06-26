@@ -7,6 +7,10 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_stripe/flutter_stripe.dart';
 
 class CreditCardScanScreen extends StatefulWidget {
+  late String clientSecretKey;
+
+  CreditCardScanScreen({Key? key, required this.clientSecretKey}) : super(key: key);
+
   @override
   _CreditCardScanScreenState createState() => _CreditCardScanScreenState();
 }
@@ -26,15 +30,36 @@ class _CreditCardScanScreenState extends State<CreditCardScanScreen> {
 
   final ValueNotifier<bool> _isScanning = ValueNotifier(true);
   late StreamSubscription _streamSubscription;
-  CardEditController _cardEditController = CardEditController();
+  CardFormEditController _cardEditController = CardFormEditController();
 
   Key _cardFieldKey = UniqueKey(); // Add a key to force rebuild
+  late String clientSecret;
 
   @override
   void initState() {
     super.initState();
 
+    clientSecret = widget.clientSecretKey;
+    print (clientSecret);
     Stripe.publishableKey = "pk_test_51O5xFBIhRsa9dgl32CyqFayAJFdJcBEGR9pc7Q7lMWjw5IQFwayjgQBD1IEAqTJVzMXdANRjaR0OEJuQJTfZsxoF00HLUXe94w";
+    Stripe.instance.initPaymentSheet(paymentSheetParameters: SetupPaymentSheetParameters(
+      // Set to true for custom flow
+      customFlow: false,
+      // Main params
+      paymentIntentClientSecret: clientSecret,
+      merchantDisplayName: 'Flutter Stripe Store Demo',
+      // Extra options
+      // applePay: const PaymentSheetApplePay(
+      //   merchantCountryCode: 'US',
+      // ),
+      // googlePay: const PaymentSheetGooglePay(
+      //   merchantCountryCode: 'US',
+      //   testEnv: true,
+      // ),
+      style: ThemeMode.dark,
+    ));
+
+     Stripe.instance.presentPaymentSheet();
     _streamSubscription = IZScan.cardScanStream.listen(
           (cardStreamInfo) {
         if (cardStreamInfo != null) {
@@ -45,7 +70,7 @@ class _CreditCardScanScreenState extends State<CreditCardScanScreen> {
             cvvCode = '';
 
             // Create a new controller with the updated details
-            _cardEditController = CardEditController(
+            _cardEditController = CardFormEditController(
               initialDetails: CardFieldInputDetails(
                 number: cardNumber,
                 expiryMonth: int.parse(expiryMonth),
@@ -70,13 +95,14 @@ class _CreditCardScanScreenState extends State<CreditCardScanScreen> {
   }
 
   Future<void> _startCardScan() async {
-    try {
-      await IZScan.startCardScan();
-    } catch (error) {
-      if (kDebugMode) {
-        print('Error starting card scan: $error');
-      }
-    }
+    await Stripe.instance.presentPaymentSheet();
+    // try {
+    //   await IZScan.startCardScan();
+    // } catch (error) {
+    //   if (kDebugMode) {
+    //     print('Error starting card scan: $error');
+    //   }
+    // }
   }
 
   void _createPaymentMethod() async {
@@ -88,9 +114,16 @@ class _CreditCardScanScreenState extends State<CreditCardScanScreen> {
       _formKey.currentState?.save();
 
       try {
+        print (PaymentMethodParams.card(
+            paymentMethodData: PaymentMethodData(
+          // billingDetails: BillingDetails(
+          //   email: _email,
+          // ),
+        )));
+
         // Create payment method
         final paymentMethod = await Stripe.instance.createPaymentMethod(
-          params: PaymentMethodParams.card(
+          params: const PaymentMethodParams.card(
             paymentMethodData: PaymentMethodData(
               // billingDetails: BillingDetails(
               //   email: _email,
@@ -173,6 +206,7 @@ class _CreditCardScanScreenState extends State<CreditCardScanScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        ElevatedButton(onPressed: _startCardScan, child: Text("Scan")),
                         TextFormField(
                           decoration: InputDecoration(labelText: 'Amount'),
                           keyboardType: TextInputType.number,
@@ -188,7 +222,9 @@ class _CreditCardScanScreenState extends State<CreditCardScanScreen> {
                         ),
                         SizedBox(height: 20),
                         CardFormField(
+                          controller: _cardEditController,
                           dangerouslyGetFullCardDetails: true,
+                          dangerouslyUpdateFullCardDetails: true,
                           key: _cardFieldKey, // Force rebuild with a unique key
                           onCardChanged: (card) {
                             setState(() {

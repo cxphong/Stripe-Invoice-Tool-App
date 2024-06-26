@@ -8,6 +8,7 @@ import 'package:stripe_invoice/product.dart';
 import 'package:stripe_invoice/scan_credit_card.dart';
 import 'package:stripe_invoice/settings.dart';
 import 'package:provider/provider.dart';
+import 'package:stripe_invoice/stripe.dart';
 import 'package:stripe_invoice/taxrate.dart';
 
 
@@ -60,8 +61,8 @@ class _MyHomePageState extends State<MyHomePage> {
               label: 'Customer',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.school),
-              label: 'Taxrate',
+              icon: Icon(Icons.payments),
+              label: 'Payment',
             ),
           ],
           currentIndex: _selectedIndex,
@@ -77,8 +78,6 @@ class _MyHomePageState extends State<MyHomePage> {
 final List<Widget> _screens = <Widget>[
   InvoiceScreen(),
   CustomerScreen(),
-  // TaxRateScreen(),
-  PaymentScreen(),
-  // ConnectPage()
-
+  // CreditCardScanScreen()
+  PaymentScreen()
 ];

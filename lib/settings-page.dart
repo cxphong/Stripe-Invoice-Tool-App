@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stripe_invoice/settings.dart';
+import 'data.dart';
+import 'settings.dart'; // Import SettingsProvider class
+import 'main.dart'; // Import MyApp class for navigation
 
 class SettingsPage extends StatelessWidget {
   @override
@@ -38,14 +40,16 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
-          // SwitchListTile(
-          //   title: Text('Enable Notifications'),
-          //   value: Provider.of<SettingsProvider>(context).notificationsEnabled,
-          //   onChanged: (bool value) {
-          //     Provider.of<SettingsProvider>(context, listen: false)
-          //         .setNotificationsEnabled(value);
-          //   },
-          // ),
+          ListTile(
+            title: Text('Log Out', style: TextStyle(color: Colors.red),),
+            onTap: () async {
+              await SharedData().clearStripeAccessKey();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => ConnectPage()),
+                    (Route<dynamic> route) => false,
+              );
+            },
+          ),
           // Add more settings options here
         ],
       ),

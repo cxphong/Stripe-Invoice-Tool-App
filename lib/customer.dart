@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/add_customer.dart';
 import 'package:stripe_invoice/constant.dart';
 import 'package:stripe_invoice/customer_detail.dart';
+import 'package:stripe_invoice/settings-page.dart';
 import 'package:stripe_invoice/utils.dart';
 import 'package:stripe_invoice/data.dart';
 
@@ -44,13 +45,13 @@ class Customer {
       addressLine2: json['address'] != null ? json['address']['line2'] : null,
       city: json['address'] != null ? json['address']['city'] : null,
       state: json['address'] != null ? json['address']['state'] : null,
-      postalCode: json['address'] != null ? json['address']['postal_code'] : null,
+      postalCode:
+      json['address'] != null ? json['address']['postal_code'] : null,
       country: json['address'] != null ? json['address']['country'] : null,
       phone: json['phone'],
     );
   }
 }
-
 
 class CustomerScreen extends StatefulWidget {
   final bool isFromAddInvoice;
@@ -66,6 +67,11 @@ class _CustomerScreenState extends State<CustomerScreen> {
   List<Customer> _customers = [];
   bool _isLoading = false;
   bool _hasMore = true;
+  String? _nextPage;
+  String _searchQuery = '';
+  String _searchType = 'name'; // Default search type
+  bool _isSearching = false; // For showing/hiding search field
+  final TextEditingController _searchController = TextEditingController();
   SharedData sharedData = SharedData();
 
   @override
@@ -110,6 +116,48 @@ class _CustomerScreenState extends State<CustomerScreen> {
     }
   }
 
+  Future<void> _searchCustomers(String query, {bool refresh = false}) async {
+    if (!_isLoading && (_hasMore || refresh)) {
+      if (!refresh) {
+        setState(() => _isLoading = true);
+      }
+      final response = await http.get(
+        Uri.https('api.stripe.com', '/v1/customers/search', {
+          'query': query,
+          'limit': '10',
+          if (!refresh && _nextPage != null) 'page': _nextPage!,
+        }),
+        headers: {'Authorization': 'Bearer ${sharedData.stripe_access_key}'},
+      );
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        final List<dynamic> customersData = jsonData['data'];
+        setState(() {
+          if (refresh) {
+            _customers.clear();
+            _nextPage = null; // Reset pagination cursor
+          }
+          _customers.addAll(
+              customersData.map((data) => Customer.fromJson(data)).toList());
+          _hasMore = jsonData['has_more'];
+          _nextPage = jsonData['next_page']; // Update next_page cursor
+        });
+      } else {
+        print('Failed to search customers: ${response.statusCode}');
+      }
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _onSearchChanged() {
+    final query = _searchController.text.trim();
+    if (query.isNotEmpty) {
+      _searchCustomers("$_searchType:'$query'", refresh: true);
+    } else {
+      _fetchCustomers(refresh: true);
+    }
+  }
+
   Future<void> _deleteCustomer(String customerId) async {
     final response = await http.delete(
       Uri.https('api.stripe.com', '/v1/customers/$customerId'),
@@ -117,11 +165,16 @@ class _CustomerScreenState extends State<CustomerScreen> {
     );
     print(response.body);
     if (response.statusCode == 200) {
-      // Customer deleted successfully, you may want to update the UI or show a message
       print('Customer deleted successfully');
     } else {
       print('Failed to delete customer: ${response.statusCode}');
     }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -130,7 +183,58 @@ class _CustomerScreenState extends State<CustomerScreen> {
       appBar: AppBar(
         title: const Text('Customers'),
         backgroundColor: Color(0xFF5469d4),
+        leading: IconButton(
+          icon: Icon(Icons.settings),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsPage()),
+            );
+          },
+        ),
         actions: <Widget>[
+          if (_isSearching)
+            Expanded(
+              child: Padding(
+                padding:
+                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search by $_searchType',
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.white,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+                    prefixIcon: Icon(Icons.search, size: 20),
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.clear, size: 20),
+                      onPressed: () {
+                        _searchController.clear();
+                        _onSearchChanged();
+                      },
+                    ),
+                  ),
+                  style: TextStyle(fontSize: 14),
+                  onChanged: (value) {
+                    _onSearchChanged();
+                  },
+                ),
+              ),
+            ),
+          IconButton(
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  _onSearchChanged();
+                }
+              });
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
@@ -141,25 +245,67 @@ class _CustomerScreenState extends State<CustomerScreen> {
             },
           ),
         ],
+        bottom: _isSearching
+            ? PreferredSize(
+          preferredSize: Size.fromHeight(50.0),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                ChoiceChip(
+                  label: Text('Name'),
+                  selected: _searchType == 'name',
+                  onSelected: (bool selected) {
+                    setState(() {
+                      _searchType = 'name';
+                    });
+                    _onSearchChanged();
+                  },
+                ),
+                SizedBox(width: 8),
+                ChoiceChip(
+                  label: Text('Email'),
+                  selected: _searchType == 'email',
+                  onSelected: (bool selected) {
+                    setState(() {
+                      _searchType = 'email';
+                    });
+                    _onSearchChanged();
+                  },
+                ),
+              ],
+            ),
+          ),
+        )
+            : null,
       ),
       body: _customers.isEmpty
-            ? const Center(
-          child: Text("No customer data"),
-        )
-            : NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollInfo) {
-            if (scrollInfo.metrics.pixels ==
-                scrollInfo.metrics.maxScrollExtent &&
-                !_isLoading) {
+          ? const Center(
+        child: Text("No customer data"),
+      )
+          : NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification scrollInfo) {
+          if (scrollInfo.metrics.pixels ==
+              scrollInfo.metrics.maxScrollExtent &&
+              !_isLoading) {
+            if (_isSearching && _hasMore) {
+              _searchCustomers("$_searchType:'${_searchController.text.trim()}'");
+            } else if (!_isSearching) {
               _fetchCustomers();
             }
-            return true;
+          }
+          return true;
+        },
+        child: RefreshIndicator(
+          onRefresh: () async {
+            if (_isSearching) {
+              await _searchCustomers("$_searchType:'${_searchController.text.trim()}'", refresh: true);
+            } else {
+              await _fetchCustomers(refresh: true);
+            }
           },
-          child: RefreshIndicator(
-            onRefresh: () =>
-                _fetchCustomers(refresh: true)
-            ,
-            child: ListView.builder(
+          child: ListView.builder(
             itemCount: _customers.length + (_hasMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index < _customers.length) {
@@ -186,12 +332,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
                     ),
                   ),
                   confirmDismiss: (direction) async {
-                    // This is where you can show a confirmation dialog
-                    // if needed, return true to allow dismiss, false otherwise
                     return true;
                   },
                   onDismissed: (direction) {
-                    // Remove the item from the data source
                     setState(() {
                       _customers.removeAt(index);
                     });
@@ -205,7 +348,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
                         title: Text(decodeText(customer.name)),
                         subtitle: Text(customer.email),
                         onTap: () {
-                          // Return the selected customer to the previous screen
                           if (widget.isFromAddInvoice) {
                             Navigator.pop(context, customer);
                           } else {
@@ -213,23 +355,26 @@ class _CustomerScreenState extends State<CustomerScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    DetailCustomerScreen(customer: customer),
+                                    DetailCustomerScreen(
+                                        customer: customer),
                               ),
-                            ).then((value) => _fetchCustomers(refresh: true));
+                            ).then((value) =>
+                                _fetchCustomers(refresh: true));
                           }
                         },
                       ),
-                      Divider(thickness: 1,)
+                      Divider(
+                        thickness: 1,
+                      ),
                     ],
-                  ) ,
-
+                  ),
                 );
               } else if (_isLoading) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               } else {
-              return const SizedBox(); // Placeholder for the loading indicator
+                return const SizedBox(); // Placeholder for the loading indicator
               }
             },
           ),
