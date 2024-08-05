@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Stripe Invoice</string>
+	<string>Stripe Admin Pro</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -22,16 +22,16 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLSchemes</key>
+	<array>
+		<string>myapp</string>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-    <key>NSCameraUsageDescription</key>
-    <string>This app requires to add file to your camera</string>
-    <key>CFBundleURLSchemes</key>
-        <array>
-          <string>myapp</string>
-        </array>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires to add file to your camera</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

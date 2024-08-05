@@ -11,9 +11,11 @@ class SharedData {
 
   // Shared variable
   String _stripeAccessKey = '';
+  String _stripePublishableKey = '';
 
   // Getter for stripe_access_key
   String get stripe_access_key => _stripeAccessKey;
+  String get stripe_publishable_key => _stripePublishableKey;
 
   // Method to save stripe_access_key
   Future<void> saveStripeAccessKey(String key) async {
@@ -34,4 +36,22 @@ class SharedData {
     _stripeAccessKey = '';
   }
 
+  // Method to save stripe_access_key
+  Future<void> saveStripePublishableKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('stripe_publishable_key', key);
+    _stripePublishableKey = key;
+  }
+
+  // Method to load stripe_access_key
+  Future<void> loadStripePublishableKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    _stripePublishableKey = prefs.getString('stripe_publishable_key') ?? _stripePublishableKey;
+  }
+
+  Future<void> clearStripePublishableKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('stripe_publishable_key');
+    _stripePublishableKey = '';
+  }
 }

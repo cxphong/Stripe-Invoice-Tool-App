@@ -45,7 +45,7 @@ class SettingsScreen extends StatelessWidget {
                 colors: const [
                   Colors.red,
                   Colors.green,
-                  Colors.blue,
+                  Color(0xFF29B6F6),
                   Colors.yellow,
                   Colors.orange,
                   Colors.purple,
@@ -68,7 +68,7 @@ class SettingsScreen extends StatelessWidget {
                 colors: const [
                   Colors.red,
                   Colors.green,
-                  Colors.blue,
+                  Color(0xFF29B6F6),
                   Colors.yellow,
                   Colors.orange,
                   Colors.purple,

@@ -63,7 +63,7 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Tax Rate'),
-        backgroundColor: Color(0xFF5469d4),
+        backgroundColor: Color(0xFF29B6F6),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

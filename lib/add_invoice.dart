@@ -246,7 +246,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Invoice'),
-        backgroundColor: Color(0xFF5469d4),
+        backgroundColor: Color(0xFF29B6F6),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -474,7 +474,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
               ElevatedButton(
                 onPressed: createInvoice,
                 style: ElevatedButton.styleFrom(
-                  // backgroundColor: Colors.blue,
+                  // backgroundColor: Color(0xFF29B6F6),
                   // Background color of the button
                   // foregroundColor: Colors.white,
                   // Text color of the button

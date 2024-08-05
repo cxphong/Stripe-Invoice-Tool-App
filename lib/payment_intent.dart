@@ -99,7 +99,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Payments'),
-        backgroundColor: Color(0xFF5469d4),
+        backgroundColor: const Color(0xFF29B6F6),
         leading: IconButton(
           icon: Icon(Icons.settings),
           onPressed: () {

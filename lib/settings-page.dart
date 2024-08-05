@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stripe_invoice/subscription_screen.dart';
 import 'data.dart';
 import 'settings.dart'; // Import SettingsProvider class
 import 'main.dart'; // Import MyApp class for navigation
@@ -41,13 +42,26 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           ListTile(
-            title: Text('Log Out', style: TextStyle(color: Colors.red),),
+            title: Text(
+              'Subscription',
+              // style: TextStyle(color: Colors.s),
+            ),
             onTap: () async {
-              await SharedData().clearStripeAccessKey();
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => ConnectPage()),
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => SubscriptionScreen()));
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Disconnect Stripe Account',
+              style: TextStyle(color: Colors.red),
+            ),
+            onTap: () async {
+                  await SharedData().clearStripeAccessKey();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => ConnectPage()),
                     (Route<dynamic> route) => false,
-              );
+                  );
             },
           ),
           // Add more settings options here

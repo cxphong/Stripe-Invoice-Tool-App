@@ -100,7 +100,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Customer'),
-        backgroundColor: Color(0xFF5469d4),
+        backgroundColor: Color(0xFF29B6F6),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -282,7 +282,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                           phone: phoneNumber != null ? phoneNumber! : "");
                   },
                   style: ElevatedButton.styleFrom(
-                    // backgroundColor: Colors.blue,
+                    // backgroundColor: Color(0xFF29B6F6),
                     // Background color of the button
                     // foregroundColor: Colors.white,
                     // Text color of the button

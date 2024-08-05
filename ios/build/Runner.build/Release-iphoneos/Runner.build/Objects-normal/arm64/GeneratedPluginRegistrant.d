@@ -1,0 +1,20 @@
+dependencies: \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/Runner/GeneratedPluginRegistrant.m \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/Runner/GeneratedPluginRegistrant.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Modules/module.modulemap \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/Flutter.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterAppDelegate.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterMacros.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterPlugin.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterBinaryMessenger.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterChannels.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterCodecs.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterPlatformViews.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterTexture.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterCallbackCache.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterDartProject.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterEngine.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterEngineGroup.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterHeadlessDartRunner.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterPluginAppLifeCycleDelegate.h \
+  /Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterViewController.h

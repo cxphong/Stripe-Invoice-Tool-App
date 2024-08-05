@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:stripe_invoice/data.dart';
+import 'package:stripe_invoice/number_keyboard.dart';
 
 class CreateStripePayment extends StatefulWidget {
   @override
@@ -16,7 +17,8 @@ class _PaymentScreenState extends State<CreateStripePayment> {
   final TextEditingController _amountController = TextEditingController();
   double amount = 0;
   final ValueNotifier<double> _amountNotifier = ValueNotifier<double>(0.0);
-  final ValueNotifier<Currency> _currencyNotifier = ValueNotifier<Currency>(Currency(
+  final ValueNotifier<Currency> _currencyNotifier =
+      ValueNotifier<Currency>(Currency(
     code: 'USD',
     name: 'United States Dollar',
     symbol: '\$',
@@ -34,9 +36,9 @@ class _PaymentScreenState extends State<CreateStripePayment> {
   @override
   void initState() {
     super.initState();
-    Stripe.publishableKey =
-    "pk_test_51O5xFBIhRsa9dgl32CyqFayAJFdJcBEGR9pc7Q7lMWjw5IQFwayjgQBD1IEAqTJVzMXdANRjaR0OEJuQJTfZsxoF00HLUXe94w";
+    Stripe.publishableKey = sharedData.stripe_publishable_key;
     _currencyNotifier.addListener(_updateFormattedAmount);
+    print(Stripe.publishableKey);
   }
 
   @override
@@ -78,17 +80,18 @@ class _PaymentScreenState extends State<CreateStripePayment> {
   makeStripePayment(String clientSecret) {
     Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
-          customFlow: false,
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: 'Flutter Stripe Store Demo',
-          style: ThemeMode.dark,
-        ));
+      customFlow: false,
+      paymentIntentClientSecret: clientSecret,
+      merchantDisplayName: 'Flutter Stripe Store Demo',
+      style: ThemeMode.dark,
+    ));
 
     Stripe.instance.presentPaymentSheet();
   }
 
   Future<void> createPaymentIntent() async {
     const String apiUrl = "https://api.stripe.com/v1/payment_intents";
+    print(amount);
 
     try {
       final response = await http.post(
@@ -108,6 +111,7 @@ class _PaymentScreenState extends State<CreateStripePayment> {
         Map<String, dynamic> jsonMap = jsonDecode(response.body);
         String clientSecret = jsonMap['client_secret'];
 
+        print("secret = " + clientSecret);
         makeStripePayment(clientSecret);
       } else {
         print('Failed to create Payment Intent: ${response.body}');
@@ -117,100 +121,196 @@ class _PaymentScreenState extends State<CreateStripePayment> {
     }
   }
 
+  void _onKeyTap(String value) {
+    final text = _amountController.text.replaceAll(RegExp(r'[^\d]'), '');
+    final newText = text + value;
+    final formattedText = _formatCurrency(newText);
+    _amountController.text = formattedText;
+    _amountController.selection =
+        TextSelection.fromPosition(TextPosition(offset: formattedText.length));
+    double amountValue = double.parse(newText) / 100.0;
+    setState(() {
+      amount = amountValue;
+    });
+  }
+
+  void _onBackspace() {
+    final text = _amountController.text.replaceAll(RegExp(r'[^\d]'), '');
+    if (text.isNotEmpty) {
+      final newText = text.substring(0, text.length - 1);
+      final formattedText = _formatCurrency(newText);
+      _amountController.text = formattedText;
+      _amountController.selection = TextSelection.fromPosition(
+          TextPosition(offset: formattedText.length));
+      double amountValue = double.parse(newText) / 100.0;
+      setState(() {
+        amount = amountValue;
+      });
+    }
+  }
+
+  void _onClear() {
+    _amountController.clear();
+    setState(() {
+      amount = 0;
+    });
+  }
+
+  String _formatCurrency(String value) {
+    if (value.isEmpty) {
+      return 'US\$0.00';
+    }
+    final number = int.parse(value);
+    final formattedNumber = (number / 100).toStringAsFixed(2);
+    return 'US\$' +
+        formattedNumber.replaceAll(RegExp(r'\B(?=(\d{3})+(?!\d))'), ',');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Payment'),
-        backgroundColor: Color(0xFF5469d4),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            const Text(
-              'Enter an amount',
-              style: TextStyle(fontSize: 18),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0),
-                      borderRadius: BorderRadius.circular(4.0),
+        body: Padding(
+      padding: const EdgeInsets.all(0.0),
+      child: Stack(
+        children: [
+          // Top section with currency input
+          FractionallySizedBox(
+            heightFactor: 0.3, // 30% of the height
+            widthFactor: 1.0,
+            child: Container(
+              color: const Color(0xFF29B6F6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Container(
+                      child: ValueListenableBuilder<Currency>(
+                        valueListenable: _currencyNotifier,
+                        builder: (context, selectedCurrency, child) {
+                          return TextField(
+                            enabled: false,
+                            controller: _amountController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.right,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              AmountInputFormatter(selectedCurrency),
+                              MaxValueInputFormatter(999999.99)
+                            ],
+                            onChanged: _onAmountChanged,
+                            style: const TextStyle(
+                                fontSize: 36.0, color: Colors.white),
+                            decoration: const InputDecoration(
+                              hintText: 'US\$0.00',
+                              hintStyle: TextStyle(color: Colors.white),
+                              border: InputBorder.none,
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    child: ValueListenableBuilder<Currency>(
-                      valueListenable: _currencyNotifier,
-                      builder: (context, selectedCurrency, child) {
-                        return TextField(
-                          controller: _amountController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.right,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            AmountInputFormatter(selectedCurrency),
-                            MaxValueInputFormatter(999999.99)
-                          ],
-                          onChanged: _onAmountChanged,
-                          style: const TextStyle(fontSize: 24.0),
-                          decoration: const InputDecoration(
-                            hintText: 'US\$0.00',
-                            border: InputBorder.none,
-                          ),
+                  ),
+                  Container(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        showCurrencyPicker(
+                          context: context,
+                          showFlag: true,
+                          showSearchField: true,
+                          showCurrencyName: true,
+                          showCurrencyCode: true,
+                          onSelect: (Currency currency) {
+                            print(currency);
+                            setState(() {
+                              _currencyNotifier.value = currency;
+                            });
+                          },
                         );
                       },
+                      icon: Icon(Icons.arrow_drop_down),
+                      label: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            _currencyNotifier.value.code,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Theme.of(context).brightness == Brightness.light
-                        ? Border.all(
-                        color: Colors.grey.shade300) // Light theme border
-                        : Border.all(), // Dark theme border
+                ],
+              ),
+            ),
+          ),
+
+          // Bottom section with number keyboard and button
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Stack(
+              children: [
+                FractionallySizedBox(
+                  heightFactor: 0.7, // 70% of the height
+                  widthFactor: 1.0, // Full width
+                  child: NumberKeyboard(
+                    onKeyTap: _onKeyTap,
+                    onBackspace: _onBackspace,
+                    onClear: _onClear,
                   ),
-                  child: TextButton.icon(
-                    onPressed: () {
-                      showCurrencyPicker(
-                        context: context,
-                        showFlag: true,
-                        showSearchField: true,
-                        showCurrencyName: true,
-                        showCurrencyCode: true,
-                        onSelect: (Currency currency) {
-                          print(currency);
-                          _currencyNotifier.value = currency;
+                ),
+                Positioned(
+                  bottom: 50, // 50 pixels from the bottom
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: FractionallySizedBox(
+                      widthFactor: 0.65, // 65% of the width
+                      child: ElevatedButton(
+                        onPressed: () {
+                          createPaymentIntent();
+                          // Add your charge action here
                         },
-                      );
-                    },
-                    icon: Icon(Icons.arrow_drop_down),
-                    label: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      // Aligns the icon and text to the left
-                      children: [
-                        Text(_currencyNotifier.value.code),
-                      ],
+                        child: Text('Charge',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF29B6F6)),
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 20),
-            ValueListenableBuilder<double>(
-              valueListenable: _amountNotifier,
-              builder: (context, amount, child) {
-                return ElevatedButton(
-                  onPressed: amount > 0 ? createPaymentIntent : null,
-                  child: Text('Pay'),
-                );
+          ),
+
+          // Close button at the top left
+          Positioned(
+            top: 50,
+            left: 20,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop(); // Close the screen
               },
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black26, // Circle color
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.white, // X icon color
+                    size: 24.0,
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
+    ));
   }
 }
 
@@ -249,7 +349,8 @@ class AmountInputFormatter extends TextInputFormatter {
       cleaned = '000';
     }
     double value = double.parse(cleaned) / 100.0;
-    final formatter = NumberFormat.currency(locale: 'en_US', symbol: '${selectedCurrency.code}\$');
+    final formatter = NumberFormat.currency(
+        locale: 'en_US', symbol: '${selectedCurrency.code}\$');
     String newText = formatter.format(value);
 
     return TextEditingValue(

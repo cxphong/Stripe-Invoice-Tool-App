@@ -372,7 +372,7 @@ class InvoiceDetailScreen extends StatelessWidget {
               child: const Text(
                 'Cancel',
                 style:
-                    TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                    TextStyle(color: Color(0xFF29B6F6), fontWeight: FontWeight.bold),
               ),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog

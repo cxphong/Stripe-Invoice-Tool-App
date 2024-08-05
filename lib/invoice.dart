@@ -207,7 +207,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Invoices'),
-        backgroundColor: Color(0xFF5469d4),
+        backgroundColor: Color(0xFF29B6F6),
         leading: IconButton(
           icon: Icon(Icons.settings),
           onPressed: () {
@@ -488,7 +488,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       case 'draft':
         return Colors.grey;
       case 'open':
-        return Colors.blueAccent;
+        return Color(0xFF29B6F6);
       case 'paid':
         return Colors.green;
       case 'uncollectible':

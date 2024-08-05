@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:stripe_invoice/settings.dart';
+import 'package:stripe_invoice/subscription.dart';
+import 'package:stripe_invoice/subscription_list.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:stripe_invoice/data.dart';
@@ -12,6 +15,7 @@ import 'apps.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedData().loadStripeAccessKey();
+  await SharedData().loadStripePublishableKey();
 
   runApp(
     ChangeNotifierProvider(
@@ -58,7 +62,9 @@ class _ConnectPageState extends State<_ConnectPage> {
   }
 
   void _launchURL() async {
-    const url = 'https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QGyQGNJXP9thoJSAjHI6qrJVsdmXGSFy&scope=read_write';
+    // test
+    const url = "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QGyQGNJXP9thoJSAjHI6qrJVsdmXGSFy&scope=read_write";
+    // const url = 'https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QXRvRNoljHiCK1Tr3GYqOyZlxrpUutdB&scope=read_write';
 
     // Start the authentication flow
     final result = await FlutterWebAuth.authenticate(
@@ -67,12 +73,12 @@ class _ConnectPageState extends State<_ConnectPage> {
     );
 
     final uri = Uri.parse(result);
+    print (uri);
     final accessToken = uri.queryParameters['access_token'];
+    final stripePublishableKey = uri.queryParameters['stripe_publishable_key'];
 
-    // Extract the authorization code from the result URL
-    // final access_key = Uri.parse(result).queryParameters['access_key'];
-    print (accessToken);
     await sharedData.saveStripeAccessKey(accessToken!);
+    await sharedData.saveStripePublishableKey(stripePublishableKey!);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => MyHomePage()),
@@ -84,17 +90,18 @@ class _ConnectPageState extends State<_ConnectPage> {
     return Scaffold(
       body: Container(
         width: double.infinity, // Ensures the container takes up the full width
-        color: Colors.blue,
+        color: Colors.white,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Spacer(),
             Text(
-              'Infinium',
+              'PaymentGlide',
               style: TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Color(0xFF29B6F6),
+                fontFamily: 'Urbanist',
               ),
             ),
             SizedBox(height: 10),
@@ -102,25 +109,31 @@ class _ConnectPageState extends State<_ConnectPage> {
               'Payments for Stripe',
               style: TextStyle(
                 fontSize: 20,
-                color: Colors.white,
+                color: Color(0xFF29B6F6),
+                fontFamily: 'Urbanist',
               ),
             ),
             SizedBox(height: 30),
-            Icon(
-              Icons.credit_card,
-              size: 100,
-              color: Colors.white,
+            Center(
+              child: Image.asset(
+                'assets/payment-icon.png',
+                width: 100.0,
+                height: 100.0,),
             ),
             SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {_launchURL();},
               // style: ElevatedButton.styleFrom(
               //   primary: Colors.white,
-              //   onPrimary: Colors.blue,
+              //   onPrimary: Color(0xFF29B6F6),
               // ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF29B6F6), // Background color
+              ),
               child: Text(
                 'Connect with Stripe',
-                style: TextStyle(color: Colors.blue),
+
+                style: TextStyle(color: Colors.white, backgroundColor: Color(0xFF29B6F6), fontFamily: 'Urbanist',),
               ),
             ),
 

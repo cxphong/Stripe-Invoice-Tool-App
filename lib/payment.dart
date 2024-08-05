@@ -20,7 +20,7 @@ class _PaymentPageState extends State<PaymentPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Stripe.publishableKey = "pk_test_51O5xFBIhRsa9dgl32CyqFayAJFdJcBEGR9pc7Q7lMWjw5IQFwayjgQBD1IEAqTJVzMXdANRjaR0OEJuQJTfZsxoF00HLUXe94w";
+    Stripe.publishableKey = "pk_live_51PfJoiKzGGJ2LnDpdgAgNmhbjOyBo18Nsyuw97NlADNa6Pp4jJfTiA1Vq8qkFdnUrbGZyF93xB6wvUUKwpYa5yhp00j1weFcK9";
   }
   void _createPaymentMethod() async {
     if (_formKey.currentState?.validate() ?? false) {
@@ -46,7 +46,7 @@ class _PaymentPageState extends State<PaymentPage> {
         final response = await http.post(
           Uri.parse('https://api.stripe.com/v1/payment_intents'),
           headers: {
-            'Authorization': 'Bearer sk_test_51O5xFBIhRsa9dgl3u1xnl2lV2mh5L30UFrisv1PNEuGCusEolpPja0YMtmtrASfztwYTj8cM52tFmBbfI2BWoB9g00pHiff5vY', // Replace with your Stripe secret key
+            'Authorization': 'Bearer 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', // Replace with your Stripe secret key
             'Content-Type': 'application/x-www-form-urlencoded',
           },
           body: {

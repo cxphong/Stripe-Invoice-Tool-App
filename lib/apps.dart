@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Color(0xFF5469d4),
+          selectedItemColor: Color(0xFF29B6F6),
           onTap: _onItemTapped,
         ),
       ),

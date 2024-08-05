@@ -1,0 +1,8 @@
+version: "Apple Swift version 5.9.2 (swiftlang-5.9.2.2.56 clang-1500.1.0.2.5)"
+options: "a12e248e1a8fba96824bdbcd28224a7eb7248257abe6cdc8c0ee1096395fb531"
+build_start_time: [1722237677, 540093000]
+build_end_time: [1722237684, 66854000]
+inputs:
+  "/Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/Runner/AppDelegate.swift": [1718181877, 206970169]
+  ? "/Users/tuyem/Documents/PROJECTS/Stripe-Invoice/ios/build/Runner.build/Release-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.swift"
+  : [1722237677, 470731545]

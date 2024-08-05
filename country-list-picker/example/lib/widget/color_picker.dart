@@ -16,7 +16,7 @@ class ColorPicker extends StatefulWidget {
       Colors.black,
       Colors.red,
       Colors.purple,
-      Colors.blue,
+      Color(0xFF29B6F6),
       Colors.green,
       Colors.orange,
     ],
