@@ -99,7 +99,10 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Customer'),
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set the color of the back indicator
+        ),
+        title: const Text('Add Customer', style: TextStyle(color: Colors.white, fontFamily: 'Urbanist')),
         backgroundColor: Color(0xFF29B6F6),
       ),
       body: Padding(
@@ -112,6 +115,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: nameController,
                   decoration: InputDecoration(
                     labelText: 'Name',
@@ -123,6 +127,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 SizedBox(height: 16),
                 const SizedBox(height: 16.0),
                 TextFormField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
@@ -143,6 +148,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
                 const SizedBox(height: 16.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: descriptionController,
                   decoration: InputDecoration(
                     labelText: 'Description',
@@ -154,7 +160,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 const SizedBox(height: 48.0),
                 Text(
                   'Billing Address',
-                  style: Theme.of(context).textTheme.headline6,
+                  style: TextStyle(fontFamily: 'Urbanist'),
                 ),
                 const SizedBox(height: 8.0),
                 DropdownButton<Countries>(
@@ -167,7 +173,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
                           country.name,
-                          style: TextStyle(fontSize: 18),
+                          style: TextStyle(fontFamily: 'Urbanist'),
                         ),
                       ),
                     );
@@ -189,6 +195,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: addressLine1Controller,
                   decoration: InputDecoration(
                     labelText: 'Address Line 1',
@@ -198,6 +205,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: addressLine2Controller,
                   decoration: InputDecoration(
                     labelText: 'Address Line 2',
@@ -207,6 +215,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: cityController,
                   decoration: InputDecoration(
                     labelText: 'City',
@@ -216,6 +225,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: provinceController,
                   decoration: InputDecoration(
                     labelText: 'Province/State',
@@ -225,6 +235,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: postalCodeController,
                   decoration: InputDecoration(
                     labelText: 'Postal Code',
@@ -286,6 +297,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     // Background color of the button
                     // foregroundColor: Colors.white,
                     // Text color of the button
+                    backgroundColor: const Color(0xFF29B6F6),
                     padding:
                         EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
                     // Button padding
@@ -298,7 +310,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   child: Text(
                     'Add Customer',
                     style: TextStyle(
-                      fontSize: 16.0, // Font size of the button text
+                      color: Colors.white,
+                      fontFamily: 'Urbanist',
+                      // fontSize: 16.0, // Font size of the button text
                       fontWeight:
                           FontWeight.bold, // Font weight of the button text
                     ),

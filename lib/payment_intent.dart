@@ -98,9 +98,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payments'),
+        title: const Text('Payments', style: TextStyle(color: Colors.white, fontFamily: 'Urbanist'),),
         backgroundColor: const Color(0xFF29B6F6),
         leading: IconButton(
+          color: Colors.white,
           icon: Icon(Icons.settings),
           onPressed: () {
             // Handle settings button press
@@ -112,6 +113,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
         actions: <Widget>[
           IconButton(
+            color: Colors.white,
             icon: const Icon(Icons.add),
             onPressed: () {
               Navigator.push(
@@ -148,10 +150,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             ListTile(
                               title: Text(
                                 '${paymentIntent.amount / 100} ${paymentIntent.currency.toUpperCase()}',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Urbanist'),
                               ),
                               subtitle: Text(
-                                  'Created: ${_formatDate(paymentIntent.created)}\nStatus: ${paymentIntent.status}'),
+                                  'Created: ${_formatDate(paymentIntent.created)}\nStatus: ${paymentIntent.status}',
+                              style: TextStyle(fontFamily: 'Urbanist'),),
                             ),
                             Divider(
                               thickness: 1,

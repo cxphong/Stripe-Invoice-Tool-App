@@ -40,7 +40,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     onPressed: () {},
                     child: Text(
                       'SUBSCRIBE',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Urbanist',),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF29B6F6),

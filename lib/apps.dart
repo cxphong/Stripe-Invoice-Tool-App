@@ -55,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.edit_document),
               label: 'Invoice',
+
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.people),

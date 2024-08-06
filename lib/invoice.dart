@@ -206,9 +206,10 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Invoices'),
+        title: const Text('Invoices', style: TextStyle(color: Colors.white, fontFamily: 'Urbanist',)),
         backgroundColor: Color(0xFF29B6F6),
         leading: IconButton(
+          color: Colors.white,
           icon: Icon(Icons.settings),
           onPressed: () {
             Navigator.push(
@@ -219,6 +220,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         ),
         actions: <Widget>[
           IconButton(
+            color: Colors.white,
             icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
               setState(() {
@@ -231,6 +233,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             },
           ),
           IconButton(
+            color: Colors.white,
             icon: const Icon(Icons.add),
             onPressed: () {
               Navigator.push(
@@ -290,7 +293,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                   },
                                 ),
                               ),
-                              style: TextStyle(fontSize: 14),
+                              style: TextStyle(fontSize: 14, fontFamily: 'Urbanist'),
                               // Adjust font size to make it smaller
                               onChanged: (value) {
                                 _onSearchChanged();
@@ -303,7 +306,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ChoiceChip(
-                            label: Text('Customer'),
+                            label: Text('Customer', style: TextStyle(fontFamily: 'Urbanist'),),
                             selected: _searchType == 'customer',
                             onSelected: (bool selected) {
                               setState(() {
@@ -314,7 +317,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           ),
                           SizedBox(width: 8),
                           ChoiceChip(
-                            label: Text('Status'),
+                            label: Text('Status', style: TextStyle(fontFamily: 'Urbanist')),
                             selected: _searchType == 'status',
                             onSelected: (bool selected) {
                               setState(() {
@@ -325,7 +328,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           ),
                           SizedBox(width: 8),
                           ChoiceChip(
-                            label: Text('Amount'),
+                            label: Text('Amount', style: TextStyle(fontFamily: 'Urbanist')),
                             selected: _searchType == 'amount',
                             onSelected: (bool selected) {
                               setState(() {

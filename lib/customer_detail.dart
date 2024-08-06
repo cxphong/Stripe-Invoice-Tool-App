@@ -12,7 +12,8 @@ import 'package:stripe_invoice/data.dart';
 class DetailCustomerScreen extends StatefulWidget {
   final Customer customer;
 
-  const DetailCustomerScreen({Key? key, required this.customer}) : super(key: key);
+  const DetailCustomerScreen({Key? key, required this.customer})
+      : super(key: key);
 
   @override
   _DetailCustomerScreenState createState() => _DetailCustomerScreenState();
@@ -40,14 +41,19 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
     super.initState();
     nameController = TextEditingController(text: widget.customer.name);
     emailController = TextEditingController(text: widget.customer.email);
-    descriptionController = TextEditingController(text: widget.customer.description);
-    addressLine1Controller = TextEditingController(text: widget.customer.addressLine1);
-    addressLine2Controller = TextEditingController(text: widget.customer.addressLine2);
+    descriptionController =
+        TextEditingController(text: widget.customer.description);
+    addressLine1Controller =
+        TextEditingController(text: widget.customer.addressLine1);
+    addressLine2Controller =
+        TextEditingController(text: widget.customer.addressLine2);
     cityController = TextEditingController(text: widget.customer.city);
     provinceController = TextEditingController(text: widget.customer.state);
-    postalCodeController = TextEditingController(text: widget.customer.postalCode);
+    postalCodeController =
+        TextEditingController(text: widget.customer.postalCode);
     phoneNumberController = TextEditingController(text: widget.customer.phone);
-    selectedCountryCode = Countries.values.firstWhere((country) => country.iso_3166_1_alpha2 == widget.customer.country);
+    selectedCountryCode = Countries.values.firstWhere(
+        (country) => country.iso_3166_1_alpha2 == widget.customer.country);
 
     sortedCountries = _countries.toList()
       ..sort((a, b) => a.name.compareTo(b.name));
@@ -97,8 +103,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('Customer updated successfully.');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Customer updated successfully.')),
+          const SnackBar(content: Text('Customer updated successfully.')),
         );
         Navigator.pop(context, true); // Return true to indicate success
       } else {
@@ -118,8 +123,14 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Customer Details'),
-        backgroundColor: Color(0xFF5469d4),
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set the color of the back indicator
+        ),
+        title: const Text(
+          'Customer Details',
+          style: TextStyle(color: Colors.white, fontFamily: 'Urbanist'),
+        ),
+        backgroundColor: Color(0xFF29B6F6),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -132,6 +143,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
               children: [
                 TextField(
                   controller: nameController,
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   decoration: InputDecoration(
                     labelText: 'Name',
                   ),
@@ -157,6 +169,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 const SizedBox(height: 16.0),
                 TextField(
                   controller: descriptionController,
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   decoration: InputDecoration(
                     labelText: 'Description',
                   ),
@@ -165,7 +178,8 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 const SizedBox(height: 16.0),
                 Text(
                   'Billing Address',
-                  style: Theme.of(context).textTheme.headline6,
+                  style: TextStyle(fontFamily: 'Urbanist'),
+                  // style: Theme.of(context).textTheme.headline6,
                 ),
                 const SizedBox(height: 8.0),
                 DropdownButton<Countries>(
@@ -178,7 +192,8 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
                           country.name,
-                          style: TextStyle(fontSize: 18),
+                          // style: TextStyle(fontSize: 18),
+                          style: TextStyle(fontFamily: 'Urbanist'),
                         ),
                       ),
                     );
@@ -191,6 +206,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: addressLine1Controller,
                   decoration: InputDecoration(
                     labelText: 'Address Line 1',
@@ -198,6 +214,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: addressLine2Controller,
                   decoration: InputDecoration(
                     labelText: 'Address Line 2',
@@ -205,6 +222,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: cityController,
                   decoration: InputDecoration(
                     labelText: 'City',
@@ -212,6 +230,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: provinceController,
                   decoration: InputDecoration(
                     labelText: 'Province/State',
@@ -219,6 +238,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: postalCodeController,
                   decoration: InputDecoration(
                     labelText: 'Postal Code',
@@ -227,6 +247,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  style: TextStyle(fontFamily: 'Urbanist'),
                   controller: phoneNumberController,
                   decoration: InputDecoration(
                     labelText: 'Phone Number',
@@ -251,7 +272,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content:
-                            Text('Please complete all required fields.')),
+                                Text('Please complete all required fields.')),
                       );
                       return;
                     }
@@ -271,17 +292,21 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                    padding:
+                        EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     elevation: 3,
+                    backgroundColor: const Color(0xFF29B6F6),
                   ),
                   child: Text(
                     'Update Customer',
                     style: TextStyle(
-                      fontSize: 16.0,
+                      color: Colors.white,
+                      // fontSize: 16.0,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Urbanist',
                     ),
                   ),
                 ),

@@ -181,10 +181,14 @@ class _CustomerScreenState extends State<CustomerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Customers'),
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set the color of the back indicator
+        ),
+        title: const Text('Customers', style: TextStyle(color: Colors.white, fontFamily: 'Urbanist'),),
         backgroundColor: Color(0xFF29B6F6),
         leading: IconButton(
           icon: Icon(Icons.settings),
+          color: Colors.white,
           onPressed: () {
             Navigator.push(
               context,
@@ -216,7 +220,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                       },
                     ),
                   ),
-                  style: TextStyle(fontSize: 14),
+                  style: TextStyle(fontSize: 14, fontFamily: 'Urbanist'),
                   onChanged: (value) {
                     _onSearchChanged();
                   },
@@ -224,6 +228,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
               ),
             ),
           IconButton(
+            color: Colors.white,
             icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
               setState(() {
@@ -236,6 +241,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
             },
           ),
           IconButton(
+            color: Colors.white,
             icon: const Icon(Icons.add),
             onPressed: () {
               Navigator.push(
@@ -254,7 +260,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 ChoiceChip(
-                  label: Text('Name'),
+                  label: Text('Name', style: TextStyle(fontFamily: 'Urbanist'),),
                   selected: _searchType == 'name',
                   onSelected: (bool selected) {
                     setState(() {
@@ -265,7 +271,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                 ),
                 SizedBox(width: 8),
                 ChoiceChip(
-                  label: Text('Email'),
+                  label: Text('Email', style: TextStyle(fontFamily: 'Urbanist'),),
                   selected: _searchType == 'email',
                   onSelected: (bool selected) {
                     setState(() {
@@ -345,8 +351,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ListTile(
-                        title: Text(decodeText(customer.name)),
-                        subtitle: Text(customer.email),
+                        title: Text(decodeText(customer.name), style: TextStyle(fontFamily: 'Urbanist'),),
+                        subtitle: Text(customer.email, style: TextStyle(fontFamily: 'Urbanist'),),
                         onTap: () {
                           if (widget.isFromAddInvoice) {
                             Navigator.pop(context, customer);

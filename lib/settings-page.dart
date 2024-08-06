@@ -10,13 +10,17 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        backgroundColor: Color(0xFF29B6F6),
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set the color of the back indicator
+        ),
+        title: Text('Settings', style: TextStyle(color: Colors.white, fontFamily: 'Urbanist')),
       ),
       body: ListView(
         children: [
           ListTile(
-            title: Text('Theme'),
-            subtitle: Text('Select App Theme'),
+            title: Text('Theme', style: TextStyle(fontFamily: 'Urbanist')),
+            subtitle: Text('Select App Theme', style: TextStyle(fontFamily: 'Urbanist')),
             trailing: DropdownButton<ThemeMode>(
               value: Provider.of<SettingsProvider>(context).themeMode,
               onChanged: (ThemeMode? newTheme) {
@@ -28,15 +32,15 @@ class SettingsPage extends StatelessWidget {
               items: [
                 DropdownMenuItem(
                   value: ThemeMode.system,
-                  child: Text('System Default'),
+                  child: Text('System Default', style: TextStyle(fontFamily: 'Urbanist'),),
                 ),
                 DropdownMenuItem(
                   value: ThemeMode.light,
-                  child: Text('Light'),
+                  child: Text('Light', style: TextStyle(fontFamily: 'Urbanist')),
                 ),
                 DropdownMenuItem(
                   value: ThemeMode.dark,
-                  child: Text('Dark'),
+                  child: Text('Dark', style: TextStyle(fontFamily: 'Urbanist')),
                 ),
               ],
             ),
@@ -44,6 +48,7 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             title: Text(
               'Subscription',
+                style: TextStyle(fontFamily: 'Urbanist')
               // style: TextStyle(color: Colors.s),
             ),
             onTap: () async {
@@ -54,7 +59,7 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             title: Text(
               'Disconnect Stripe Account',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: Colors.red, fontFamily: 'Urbanist'),
             ),
             onTap: () async {
                   await SharedData().clearStripeAccessKey();

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:stripe_invoice/settings.dart';
 import 'package:stripe_invoice/subscription.dart';
 import 'package:stripe_invoice/subscription_list.dart';
@@ -32,38 +34,87 @@ class ConnectPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
-        builder: (context, settingsProvider, child)
-        {
-          return MaterialApp(
-            title: 'Flutter Demo',
-            home:  sharedData.stripe_access_key.isEmpty ?  _ConnectPage() : MyHomePage(),
-            theme: ThemeData.light(),
-            darkTheme: ThemeData.dark(),
-            themeMode: settingsProvider.themeMode,
-          );
-        });
-
+        builder: (context, settingsProvider, child) {
+      return MaterialApp(
+        title: 'Flutter Demo',
+        home: sharedData.stripe_access_key.isEmpty
+            ? _ConnectPage()
+            : MyHomePage(),
+        // theme: ThemeData.light(),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+            selectedLabelStyle: TextStyle(
+              fontFamily: 'Urbanist', // Set the font family for selected label
+            ),
+            unselectedLabelStyle: TextStyle(
+              fontFamily:
+              'Urbanist', // Set the font family for unselected label
+            ),
+          ),
+        ),
+        themeMode: settingsProvider.themeMode,
+        theme: ThemeData(
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+            selectedLabelStyle: TextStyle(
+              fontFamily: 'Urbanist', // Set the font family for selected label
+            ),
+            unselectedLabelStyle: TextStyle(
+              fontFamily:
+                  'Urbanist', // Set the font family for unselected label
+            ),
+          ),
+        ),
+      );
+    });
   }
 }
 
 class _ConnectPage extends StatefulWidget {
   const _ConnectPage({Key? key}) : super(key: key);
+
   _ConnectPageState createState() => _ConnectPageState();
 }
 
 class _ConnectPageState extends State<_ConnectPage> {
   StreamSubscription? _sub;
   SharedData sharedData = SharedData();
+  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
+  String _packageName = '';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    _inAppPurchase.purchaseStream.listen((purchaseDetailsList) {
+      _listenToPurchaseUpdated(purchaseDetailsList);
+    });
+  }
+
+  void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
+    print(purchaseDetailsList);
+  }
+
+  void loadInappPurchase() async {
+    print(await _inAppPurchase.isAvailable());
+    const Set<String> _kIds = <String>{'aa', '6_months', 'monthly'};
+    final ProductDetailsResponse response =
+        await InAppPurchase.instance.queryProductDetails(_kIds);
+    if (response.notFoundIDs.isNotEmpty) {
+      // Handle the error.
+      print("not found");
+    }
+    List<ProductDetails> products = response.productDetails;
+
+    print(response.productDetails);
+    print(response.notFoundIDs);
   }
 
   void _launchURL() async {
     // test
-    const url = "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QGyQGNJXP9thoJSAjHI6qrJVsdmXGSFy&scope=read_write";
+    const url =
+        "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QGyQGNJXP9thoJSAjHI6qrJVsdmXGSFy&scope=read_write";
     // const url = 'https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QXRvRNoljHiCK1Tr3GYqOyZlxrpUutdB&scope=read_write';
 
     // Start the authentication flow
@@ -73,7 +124,7 @@ class _ConnectPageState extends State<_ConnectPage> {
     );
 
     final uri = Uri.parse(result);
-    print (uri);
+    print(uri);
     final accessToken = uri.queryParameters['access_token'];
     final stripePublishableKey = uri.queryParameters['stripe_publishable_key'];
 
@@ -118,11 +169,17 @@ class _ConnectPageState extends State<_ConnectPage> {
               child: Image.asset(
                 'assets/payment-icon.png',
                 width: 100.0,
-                height: 100.0,),
+                height: 100.0,
+              ),
             ),
             SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {_launchURL();},
+              onPressed: () {
+                _launchURL();
+              },
+              // onPressed:  () async {
+              //   loadInappPurchase();
+              // },
               // style: ElevatedButton.styleFrom(
               //   primary: Colors.white,
               //   onPrimary: Color(0xFF29B6F6),
@@ -132,11 +189,13 @@ class _ConnectPageState extends State<_ConnectPage> {
               ),
               child: Text(
                 'Connect with Stripe',
-
-                style: TextStyle(color: Colors.white, backgroundColor: Color(0xFF29B6F6), fontFamily: 'Urbanist',),
+                style: TextStyle(
+                  color: Colors.white,
+                  backgroundColor: Color(0xFF29B6F6),
+                  fontFamily: 'Urbanist',
+                ),
               ),
             ),
-
             Spacer(),
           ],
         ),

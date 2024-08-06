@@ -52,7 +52,7 @@ class NumberKeyboard extends StatelessWidget {
           ),
           child: Text(
             value,
-            style: (value == 'x' || value == '<' ) ? TextStyle(fontSize: 24, color: Colors.blueGrey) : TextStyle(fontSize: 24, color: const Color(0xFF29B6F6)),
+            style: (value == 'x' || value == '<' ) ? TextStyle(fontSize: 24, color: Colors.blueGrey, fontFamily: 'Urbanist') : TextStyle(fontSize: 24, color: const Color(0xFF29B6F6), fontFamily: 'Urbanist'),
           ),
         ));
         // Padding(

@@ -200,10 +200,10 @@ class _PaymentScreenState extends State<CreateStripePayment> {
                             ],
                             onChanged: _onAmountChanged,
                             style: const TextStyle(
-                                fontSize: 36.0, color: Colors.white),
+                                fontSize: 36.0, color: Colors.white, fontFamily: 'Urbanist'),
                             decoration: const InputDecoration(
                               hintText: 'US\$0.00',
-                              hintStyle: TextStyle(color: Colors.white),
+                              hintStyle: TextStyle(color: Colors.white, fontFamily: 'Urbanist'),
                               border: InputBorder.none,
                             ),
                           );
@@ -234,7 +234,7 @@ class _PaymentScreenState extends State<CreateStripePayment> {
                         children: [
                           Text(
                             _currencyNotifier.value.code,
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white, fontFamily: 'Urbanist'),
                           ),
                         ],
                       ),
@@ -273,7 +273,7 @@ class _PaymentScreenState extends State<CreateStripePayment> {
                         },
                         child: Text('Charge',
                             style:
-                                TextStyle(color: Colors.white, fontSize: 16)),
+                                TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Urbanist'), ),
                         style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF29B6F6)),
                       ),
