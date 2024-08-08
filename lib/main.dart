@@ -7,11 +7,13 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:stripe_invoice/settings.dart';
 import 'package:stripe_invoice/subscription.dart';
 import 'package:stripe_invoice/subscription_list.dart';
+import 'package:stripe_invoice/subscription_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:stripe_invoice/data.dart';
 import 'package:provider/provider.dart';
-
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
+import 'package:in_app_purchase_platform_interface/in_app_purchase_platform_interface.dart';
 import 'apps.dart';
 
 void main() async {
@@ -49,7 +51,7 @@ class ConnectPage extends StatelessWidget {
             ),
             unselectedLabelStyle: TextStyle(
               fontFamily:
-              'Urbanist', // Set the font family for unselected label
+                  'Urbanist', // Set the font family for unselected label
             ),
           ),
         ),
@@ -80,35 +82,11 @@ class _ConnectPageState extends State<_ConnectPage> {
   StreamSubscription? _sub;
   SharedData sharedData = SharedData();
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
-  String _packageName = '';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    _inAppPurchase.purchaseStream.listen((purchaseDetailsList) {
-      _listenToPurchaseUpdated(purchaseDetailsList);
-    });
-  }
-
-  void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
-    print(purchaseDetailsList);
-  }
-
-  void loadInappPurchase() async {
-    print(await _inAppPurchase.isAvailable());
-    const Set<String> _kIds = <String>{'aa', '6_months', 'monthly'};
-    final ProductDetailsResponse response =
-        await InAppPurchase.instance.queryProductDetails(_kIds);
-    if (response.notFoundIDs.isNotEmpty) {
-      // Handle the error.
-      print("not found");
-    }
-    List<ProductDetails> products = response.productDetails;
-
-    print(response.productDetails);
-    print(response.notFoundIDs);
   }
 
   void _launchURL() async {
@@ -175,11 +153,12 @@ class _ConnectPageState extends State<_ConnectPage> {
             SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                _launchURL();
+                // _launchURL();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SubscriptionScreen()),
+                );
               },
-              // onPressed:  () async {
-              //   loadInappPurchase();
-              // },
               // style: ElevatedButton.styleFrom(
               //   primary: Colors.white,
               //   onPrimary: Color(0xFF29B6F6),
