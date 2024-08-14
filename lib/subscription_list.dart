@@ -4,20 +4,21 @@ import 'package:flutter/painting.dart';
 import 'subscription.dart';
 
 class SubscriptionList extends StatefulWidget {
-  const SubscriptionList({Key? key}) : super(key: key);
+  int selectedId;
+  final void Function(int) onTap;
+
+  SubscriptionList({Key? key, required this.selectedId, required this.onTap}) : super(key: key);
 
   @override
   State<SubscriptionList> createState() => _SubscriptionListState();
 }
 
 class _SubscriptionListState extends State<SubscriptionList> {
-  int selectedId = 1;
 
-  void onTap(int id) {
-    print(id);
-    setState(() {
-      selectedId = id;
-    });
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
   }
 
   String getPlanDescription(int id) {
@@ -35,7 +36,7 @@ class _SubscriptionListState extends State<SubscriptionList> {
 
   @override
   Widget build(BuildContext context) {
-    String planDescription = getPlanDescription(selectedId);
+    String planDescription = getPlanDescription(widget.selectedId);
 
     return Padding(
       padding: EdgeInsets.all(8.0),
@@ -56,8 +57,8 @@ class _SubscriptionListState extends State<SubscriptionList> {
                       text2: "MONTH",
                       text3: "\$19.99",
                       text4: "\$4.6 per week",
-                      onTap: onTap,
-                      selectedId: selectedId,
+                      onTap: widget.onTap,
+                      selectedId: widget.selectedId,
                     ),
                   ),
                 ),
@@ -71,8 +72,8 @@ class _SubscriptionListState extends State<SubscriptionList> {
                       text2: "MONTHS",
                       text3: "\$199",
                       text4: "\$3.8 per week",
-                      onTap: onTap,
-                      selectedId: selectedId,
+                      onTap: widget.onTap,
+                      selectedId: widget.selectedId,
                     ),
                   ),
                 ),
@@ -86,8 +87,8 @@ class _SubscriptionListState extends State<SubscriptionList> {
                       text2: "UNLIMITED",
                       text3: "\$499",
                       text4: "Best saving",
-                      onTap: onTap,
-                      selectedId: selectedId,
+                      onTap: widget.onTap,
+                      selectedId: widget.selectedId,
                     ),
                   ),
                 ),

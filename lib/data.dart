@@ -12,10 +12,12 @@ class SharedData {
   // Shared variable
   String _stripeAccessKey = '';
   String _stripePublishableKey = '';
+  String _appleUserIdentifier = '';
 
   // Getter for stripe_access_key
   String get stripe_access_key => _stripeAccessKey;
   String get stripe_publishable_key => _stripePublishableKey;
+  String get apple_user_identifier => _appleUserIdentifier;
 
   // Method to save stripe_access_key
   Future<void> saveStripeAccessKey(String key) async {
@@ -54,4 +56,24 @@ class SharedData {
     await prefs.remove('stripe_publishable_key');
     _stripePublishableKey = '';
   }
+
+  // Method to save stripe_access_key
+  Future<void> saveAppleUserIdentifier(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('apple_user_identifier', key);
+    _appleUserIdentifier = key;
+  }
+
+  // Method to load stripe_access_key
+  Future<void> loadAppleUserIdentifier() async {
+    final prefs = await SharedPreferences.getInstance();
+    _appleUserIdentifier = prefs.getString('apple_user_identifier') ?? _appleUserIdentifier;
+  }
+
+  Future<void> clearAppleUserIdentifier() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('apple_user_identifier');
+    _appleUserIdentifier = '';
+  }
+
 }

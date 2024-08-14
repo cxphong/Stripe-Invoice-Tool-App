@@ -1,13 +1,10 @@
 {
-  "identifier" : "B60FF8AC",
+  "identifier" : "9921A577",
   "nonRenewingSubscriptions" : [
-
-  ],
-  "products" : [
     {
-      "displayPrice" : "0.99",
+      "displayPrice" : "499",
       "familyShareable" : false,
-      "internalID" : "6B2EE9E5",
+      "internalID" : "725091CB",
       "localizations" : [
         {
           "description" : "",
@@ -15,15 +12,15 @@
           "locale" : "en_US"
         }
       ],
-      "productID" : "one_time",
-      "referenceName" : "One time",
-      "type" : "NonConsumable"
+      "productID" : "unlimited",
+      "referenceName" : "unlimited",
+      "type" : "NonRenewingSubscription"
     }
   ],
+  "products" : [
+
+  ],
   "settings" : {
-    "_compatibilityTimeRate" : {
-      "3" : 6
-    },
     "_failTransactionsEnabled" : false,
     "_locale" : "en_US",
     "_storefront" : "USA",
@@ -59,10 +56,7 @@
         "name" : "App Transaction"
       },
       {
-        "current" : {
-          "index" : 3,
-          "type" : "generic"
-        },
+        "current" : null,
         "enabled" : false,
         "name" : "Manage Subscriptions Sheet"
       },
@@ -76,16 +70,15 @@
         "enabled" : false,
         "name" : "Offer Code Redeem Sheet"
       }
-    ],
-    "_timeRate" : 1001
+    ]
   },
   "subscriptionGroups" : [
     {
-      "id" : "4EA30E79",
+      "id" : "7C22FE90",
       "localizations" : [
 
       ],
-      "name" : "Subscriptions",
+      "name" : "subs",
       "subscriptions" : [
         {
           "adHocOffers" : [
@@ -94,10 +87,10 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "0.99",
+          "displayPrice" : "19.99",
           "familyShareable" : false,
           "groupNumber" : 1,
-          "internalID" : "618B0D93",
+          "internalID" : "0DA498F2",
           "introductoryOffer" : null,
           "localizations" : [
             {
@@ -108,8 +101,8 @@
           ],
           "productID" : "sub_1_month",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "1 month",
-          "subscriptionGroupID" : "4EA30E79",
+          "referenceName" : "sub_1_month",
+          "subscriptionGroupID" : "7C22FE90",
           "type" : "RecurringSubscription"
         },
         {
@@ -119,10 +112,10 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "0.99",
+          "displayPrice" : "199",
           "familyShareable" : false,
           "groupNumber" : 1,
-          "internalID" : "8BB9D2A0",
+          "internalID" : "D5EB0BC8",
           "introductoryOffer" : null,
           "localizations" : [
             {
@@ -133,8 +126,8 @@
           ],
           "productID" : "sub_12_months",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "12 months",
-          "subscriptionGroupID" : "4EA30E79",
+          "referenceName" : "sub 12 months",
+          "subscriptionGroupID" : "7C22FE90",
           "type" : "RecurringSubscription"
         }
       ]

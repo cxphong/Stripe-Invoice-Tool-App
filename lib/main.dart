@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:http/http.dart' as http;
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:stripe_invoice/apple_signin.dart';
 import 'package:stripe_invoice/settings.dart';
 import 'package:stripe_invoice/subscription.dart';
 import 'package:stripe_invoice/subscription_list.dart';
