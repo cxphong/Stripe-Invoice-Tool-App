@@ -7,6 +7,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:stripe_invoice/apple_store_products.dart';
 import 'package:stripe_invoice/apps.dart';
 import 'package:stripe_invoice/data.dart';
+import 'package:stripe_invoice/progress_dialog.dart';
 import 'package:stripe_invoice/stripe_connect_page.dart';
 import 'package:stripe_invoice/subscription.dart';
 import 'package:stripe_invoice/subscription_list.dart';
@@ -34,6 +35,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   @override
   void initState() {
     // TODO: implement initState
+    super.initState();
+
     _inAppPurchase.purchaseStream.listen((purchaseDetailsList) {
       if (processingPurchase) {
         _listenToPurchaseUpdated(purchaseDetailsList);
@@ -41,7 +44,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     });
     selectedId = 1;
     loadInappPurchase();
-    super.initState();
+    _completePendingTransactions();
+  }
+
+  Future<void> _completePendingTransactions() async {
+    final Stream<List<PurchaseDetails>> purchaseStream = _inAppPurchase.purchaseStream;
+    final List<PurchaseDetails> pendingPurchases = await purchaseStream.first;
+
+    for (PurchaseDetails purchase in pendingPurchases) {
+      if (purchase.pendingCompletePurchase) {
+        await InAppPurchase.instance.completePurchase(purchase);
+      }
+    }
   }
 
   void onTap(int id) {
@@ -125,6 +139,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     for (var i = 0; i < purchaseDetailsList.length; i++) {
       PurchaseDetails purchaseDetails = purchaseDetailsList[i];
 
+      print(purchaseDetails.status);
+
       // Mark the purchase as pending and add it to the processed set
       if (purchaseDetails.status == PurchaseStatus.pending) {
       } else {
@@ -134,12 +150,13 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           });
           // Handle the error if necessary
           // _handleError(purchaseDetails.error!);
+          // hideProgress(context);
         } else if (purchaseDetails.status == PurchaseStatus.purchased ||
             purchaseDetails.status == PurchaseStatus.restored) {
           bool valid = await postPurchaseVerification(purchaseDetails);
 
           if (valid) {
-            await AppleStoreProductManager().loadInappPurchase();
+            await AppleStoreProductManager().loadSubscriptionStatus();
 
             if (SharedData().stripe_access_key.isEmpty) {
               Navigator.pushReplacement(
@@ -158,6 +175,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             // _handleInvalidPurchase(purchaseDetails);
           }
 
+          // hideProgress(context);
+          setState(() {
+            processingPurchase = false;
+          });
+        } else if (purchaseDetails.status == PurchaseStatus.canceled) {
           setState(() {
             processingPurchase = false;
           });
@@ -168,6 +190,20 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         }
       }
     }
+  }
+
+  void showProgress(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const ProgressDialog(message: "Processing ...");
+      },
+    );
+  }
+
+  void hideProgress(BuildContext context) {
+    Navigator.of(context).pop();
   }
 
   Future<bool> postPurchaseVerification(PurchaseDetails purchaseDetails) async {
@@ -245,6 +281,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                           processingPurchase = true;
                         });
 
+                        // showProgress(context);
                         final PurchaseParam purchaseParam =
                             PurchaseParam(productDetails: product);
                         _inAppPurchase.buyConsumable(

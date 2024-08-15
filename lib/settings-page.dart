@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:stripe_invoice/apple_store_products.dart';
 import 'package:stripe_invoice/renewal_transaction_screen.dart';
@@ -9,7 +10,31 @@ import 'data.dart';
 import 'settings.dart'; // Import SettingsProvider class
 import 'main.dart'; // Import MyApp class for navigation
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
+
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  String _version = '';
+  String _buildNumber = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _initPackageInfo();
+  }
+
+  Future<void> _initPackageInfo() async {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    setState(() {
+      _version = packageInfo.version;
+      _buildNumber = packageInfo.buildNumber;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +80,7 @@ class SettingsPage extends StatelessWidget {
                 style: TextStyle(fontFamily: 'Urbanist')
               // style: TextStyle(color: Colors.s),
             ),
+            subtitle: Text(AppleStoreProductManager().renewalTransaction?.productId ?? ""),
             onTap: () async {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) =>
@@ -64,8 +90,8 @@ class SettingsPage extends StatelessWidget {
           ),
           ListTile(
             title: Text(
-              'Disconnect Stripe Account',
-              style: TextStyle(color: Colors.red, fontFamily: 'Urbanist'),
+              'Disconnect Stripe',
+              style: TextStyle(fontFamily: 'Urbanist'),
             ),
             onTap: () async {
                   await SharedData().clearStripeAccessKey();
@@ -75,6 +101,20 @@ class SettingsPage extends StatelessWidget {
                   );
             },
           ),
+          ListTile(
+            title: Text(
+              'iOS App version ${_version}+${_buildNumber}',
+              style: TextStyle(fontFamily: 'Urbanist'),
+            ),
+            onTap: () async {
+              await SharedData().clearStripeAccessKey();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => StripeConnectPage()),
+                    (Route<dynamic> route) => false,
+              );
+            },
+          ),
+          //
           // ListTile(
           //   title: Text(
           //     'Sign in with Apple',
@@ -92,5 +132,11 @@ class SettingsPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    throw UnimplementedError();
   }
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ProgressDialog extends StatelessWidget {
+  final String message;
+
+  const ProgressDialog({Key? key, required this.message}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +17,7 @@ class ProgressDialog extends StatelessWidget {
           children: [
             CircularProgressIndicator(),
             SizedBox(width: 20.0),
-            Text("Downloading...", style: TextStyle(fontFamily: 'Urbanist')),
+            Text(message, style: TextStyle(fontFamily: 'Urbanist')),
           ],
         ),
       ),
