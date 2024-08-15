@@ -14,7 +14,7 @@ class ProgressDialog extends StatelessWidget {
           children: [
             CircularProgressIndicator(),
             SizedBox(width: 20.0),
-            Text("Downloading..."),
+            Text("Downloading...", style: TextStyle(fontFamily: 'Urbanist')),
           ],
         ),
       ),

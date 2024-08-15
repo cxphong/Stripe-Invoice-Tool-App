@@ -309,7 +309,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                       },
                     );
                   },
-                  icon: Icon(Icons.arrow_drop_down),
+                  icon: Icon(Icons.arrow_drop_down, color: Color(0xFF29B6F6)),
                   label: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     // Aligns the icon and text to the left
@@ -320,7 +320,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                   " - " +
                                   selectedCurrency!.code
                               : "Select currency",
-                          style: TextStyle(fontFamily: 'Urbanist')),
+                          style: TextStyle(color: Color(0xFF29B6F6), fontFamily: 'Urbanist')),
                     ],
                   ),
                 ),
@@ -411,9 +411,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                 ),
                 child: TextButton.icon(
                   onPressed: addItem,
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(Icons.add, color: Color(0xFF29B6F6),),
                   label: const Text('Add Item',
-                      style: TextStyle(fontFamily: 'Urbanist')),
+                      style: TextStyle(fontFamily: 'Urbanist', color: Color(0xFF29B6F6))),
                 ),
               ),
               const SizedBox(height: 16.0),

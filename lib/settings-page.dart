@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stripe_invoice/apple_store_products.dart';
+import 'package:stripe_invoice/renewal_transaction_screen.dart';
+import 'package:stripe_invoice/apple_signin.dart';
 import 'package:stripe_invoice/subscription_screen.dart';
 import 'data.dart';
 import 'settings.dart'; // Import SettingsProvider class
@@ -53,7 +56,9 @@ class SettingsPage extends StatelessWidget {
             ),
             onTap: () async {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => SubscriptionScreen()));
+                MaterialPageRoute(builder: (context) =>
+                    RenewalTransactionScreen(transaction:
+                AppleStoreProductManager().renewalTransaction)));
             },
           ),
           ListTile(
@@ -69,6 +74,19 @@ class SettingsPage extends StatelessWidget {
                   );
             },
           ),
+          // ListTile(
+          //   title: Text(
+          //     'Sign in with Apple',
+          //     style: TextStyle(color: Colors.white, fontFamily: 'Urbanist'),
+          //   ),
+          //   onTap: () async {
+          //     await SharedData().clearStripeAccessKey();
+          //     Navigator.of(context).pushAndRemoveUntil(
+          //       MaterialPageRoute(builder: (context) => AppleSignInScreen()),
+          //           (Route<dynamic> route) => false,
+          //     );
+          //   },
+          // ),
           // Add more settings options here
         ],
       ),

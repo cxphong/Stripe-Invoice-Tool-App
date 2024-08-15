@@ -5,10 +5,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:stripe_invoice/stripe_connect_page.dart';
 import 'package:stripe_invoice/data.dart';
 import 'package:stripe_invoice/subscription.dart';
 import 'package:stripe_invoice/subscription_list.dart';
 import 'package:http/http.dart' as http;
+
+import 'apps.dart';
 
 class AppleSignInScreen extends StatefulWidget {
   const AppleSignInScreen({Key? key}) : super(key: key);
@@ -63,36 +66,60 @@ class _AppleSignInScreenState extends State<AppleSignInScreen> {
             width: double.infinity,
             // Ensures the container takes up the full width
             color: Colors.white,
+            padding: EdgeInsets.fromLTRB(16, 100, 16, 0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Padding(padding: EdgeInsets.fromLTRB(16, 120, 16, 0),
-                child: SignInWithAppleButton(
-                  onPressed: () async {
-                    final credential =
-                    await SignInWithApple.getAppleIDCredential(
-                      scopes: [
-                        AppleIDAuthorizationScopes.email,
-                        AppleIDAuthorizationScopes.fullName,
-                      ],
-                    );
+                Text(
+                  'Create your account',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Color(0xFF29B6F6),
+                    fontFamily: 'Urbanist',
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 64, 0, 0),
+                  child: SignInWithAppleButton(
+                    onPressed: () async {
+                      final credential =
+                          await SignInWithApple.getAppleIDCredential(
+                        scopes: [
+                          AppleIDAuthorizationScopes.email,
+                          AppleIDAuthorizationScopes.fullName,
+                        ],
+                      );
 
-                    print(credential);
-                    createUser(
-                        appleId: credential.userIdentifier!,
-                        email: "",
-                        firstName: "",
-                        lastName: "");
+                      print(credential);
+                      createUser(
+                          appleId: credential.userIdentifier!,
+                          email: "",
+                          firstName: "",
+                          lastName: "");
 
+                      if (credential.userIdentifier != null) {
+                        data.saveAppleUserIdentifier(
+                            credential.userIdentifier!);
+                      }
 
-                    if (credential.userIdentifier != null) {
-                      data.saveAppleUserIdentifier(credential.userIdentifier!);
-                    }
+                      if (data.stripe_access_key.isEmpty) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => StripeConnectPage()),
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MyHomePage()),
+                        );
+                      }
 
-                    // Now send the credential (especially `credential.authorizationCode`) to your server to create a session
-                    // after they have been validated with Apple (see `Integration` section for more information on how to do this)
-                  },
-                ),)
+                      // Now send the credential (especially `credential.authorizationCode`) to your server to create a session
+                      // after they have been validated with Apple (see `Integration` section for more information on how to do this)
+                    },
+                  ),
+                ),
               ],
             ),
           ),

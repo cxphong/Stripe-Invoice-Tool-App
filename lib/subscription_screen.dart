@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:stripe_invoice/apps.dart';
 import 'package:stripe_invoice/data.dart';
 import 'package:stripe_invoice/subscription.dart';
 import 'package:stripe_invoice/subscription_list.dart';
@@ -136,6 +137,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           bool valid = await postPurchaseVerification(purchaseDetails);
           if (valid) {
             // _deliverProduct(purchaseDetails);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MyHomePage()),
+            );
           } else {
             // _handleInvalidPurchase(purchaseDetails);
           }
@@ -146,12 +151,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         }
       }
     });
-  }
-
-  Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) {
-    // IMPORTANT!! Always verify a purchase before delivering the product.
-    // For the purpose of an example, we directly return true.
-    return Future<bool>.value(true);
   }
 
   Future<bool> postPurchaseVerification(PurchaseDetails purchaseDetails) async {
@@ -205,7 +204,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               children: [
                 // Text("Length = ${selectedId}"),
                 Text(
-                  'Start your free 7 days trial',
+                  'Your free 7 days trial has ended',
                   style: TextStyle(
                     fontFamily: 'Urbanist',
                     fontSize: 24,
@@ -240,29 +239,29 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               ],
             ),
           ),
-          Positioned(
-            top: 50.0,
-            left: 20.0,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop(); // Close the screen
-              },
-              child: Container(
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black26, // Circle color
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.close,
-                    color: Colors.white, // X icon color
-                    size: 24.0,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Positioned(
+          //   top: 50.0,
+          //   left: 20.0,
+          //   child: GestureDetector(
+          //     onTap: () {
+          //       Navigator.of(context).pop(); // Close the screen
+          //     },
+          //     child: Container(
+          //       decoration: const BoxDecoration(
+          //         shape: BoxShape.circle,
+          //         color: Colors.black26, // Circle color
+          //       ),
+          //       child: const Padding(
+          //         padding: EdgeInsets.all(8.0),
+          //         child: Icon(
+          //           Icons.close,
+          //           color: Colors.white, // X icon color
+          //           size: 24.0,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
