@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:stripe_invoice/freetrial.dart';
+import 'package:stripe_invoice/stripe_connect_page.dart';
 import 'package:stripe_invoice/subscription_screen.dart';
 
 import 'apps.dart';
@@ -51,10 +52,17 @@ class _LauncherScreenState extends State<LauncherScreen> {
           MaterialPageRoute(builder: (context) => SubscriptionScreen()),
         );
       } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MyHomePage()),
-        );
+        if (SharedData().stripe_access_key.isEmpty) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => StripeConnectPage()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MyHomePage()),
+          );
+        }
       }
     }
   }

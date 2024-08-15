@@ -115,6 +115,16 @@ class _PaymentScreenState extends State<CreateStripePayment> {
         makeStripePayment(clientSecret);
       } else {
         print('Failed to create Payment Intent: ${response.body}');
+        final jsonResponse = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              jsonResponse["error"]["message"].toString(),
+              style: const TextStyle(fontFamily: 'Urbanist'),
+            ),
+          ),
+        );
+
       }
     } catch (e) {
       print('Error occurred while creating Payment Intent: $e');

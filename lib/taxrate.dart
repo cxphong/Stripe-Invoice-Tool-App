@@ -125,7 +125,7 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Tax Rates'),
-        backgroundColor: Color(0xFF5469d4),
+        backgroundColor: Color(0xFF29B6F6),
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -144,7 +144,7 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
           ? Center(
         child: _isLoading
             ? CircularProgressIndicator()
-            : Text('No active tax rates available'),
+            : Text('No active tax rates available', style: TextStyle(fontFamily: 'Urbanist'),),
       )
           : NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification scrollInfo) {
@@ -184,8 +184,8 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
                 },
                 child: ListTile(
                   title: Text(taxRate.displayName),
-                  subtitle: Text('${taxRate.taxType} - ${taxRate.percentage}%'),
-                  trailing: Text(taxRate.inclusive ? "Inclusive" : "Exclusive"),
+                  subtitle: Text('${taxRate.taxType} - ${taxRate.percentage}%', style: TextStyle(fontFamily: 'Urbanist'),),
+                  trailing: Text(taxRate.inclusive ? "Inclusive" : "Exclusive", style: TextStyle(fontFamily: 'Urbanist'),),
                   onTap: widget.selectMode
                       ? () {
                     Navigator.pop(context, taxRate);

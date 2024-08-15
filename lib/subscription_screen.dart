@@ -4,8 +4,10 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:stripe_invoice/apple_store_products.dart';
 import 'package:stripe_invoice/apps.dart';
 import 'package:stripe_invoice/data.dart';
+import 'package:stripe_invoice/stripe_connect_page.dart';
 import 'package:stripe_invoice/subscription.dart';
 import 'package:stripe_invoice/subscription_list.dart';
 import 'package:http/http.dart' as http;
@@ -21,14 +23,21 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   List<ProductDetails> productDetails = [];
   late int selectedId;
-  static const List<String> _kIds = ['sub_1_month', 'sub_12_months', 'unlimited'];
+  static const List<String> _kIds = [
+    'sub_1_month',
+    'sub_12_months',
+    'unlimited'
+  ];
   SharedData data = SharedData();
+  bool processingPurchase = false;
 
   @override
   void initState() {
     // TODO: implement initState
     _inAppPurchase.purchaseStream.listen((purchaseDetailsList) {
-      _listenToPurchaseUpdated(purchaseDetailsList);
+      if (processingPurchase) {
+        _listenToPurchaseUpdated(purchaseDetailsList);
+      }
     });
     selectedId = 1;
     loadInappPurchase();
@@ -46,7 +55,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     required String originalTransactionId,
   }) async {
     // Replace with your API Gateway URL or Lambda URL
-    final String apiUrl = 'https://8n5whw25p0.execute-api.us-east-1.amazonaws.com/default/stripe-admin-apple-users';
+    final String apiUrl =
+        'https://8n5whw25p0.execute-api.us-east-1.amazonaws.com/default/stripe-admin-apple-users';
 
     final Map<String, dynamic> requestBody = {
       'apple_id': "001818.21b0770e1602420788aa4ce5a89bccee.0848", //appleId,
@@ -81,16 +91,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     }
   }
 
-
   void loadInappPurchase() async {
     final ProductDetailsResponse response =
-    await _inAppPurchase.queryProductDetails(_kIds.toSet());
-
-    print (response.productDetails);
-    // if (response.notFoundIDs.isNotEmpty) {
-    //   // Handle the error.
-    //   print("not found");
-    // }
+        await _inAppPurchase.queryProductDetails(_kIds.toSet());
 
     setState(() {
       // print (response.notFoundIDs);
@@ -105,7 +108,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         print(value.rawPrice);
       }
     });
-
   }
 
   ProductDetails? retrieveSelectedProduct() {
@@ -118,48 +120,63 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     return null;
   }
 
-  void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
-    purchaseDetailsList.forEach((PurchaseDetails purchaseDetails) async {
-      // print(purchaseDetails.status);
-      // print(purchaseDetails.pendingCompletePurchase);
-      // print(purchaseDetails.productID);
-      // print(purchaseDetails.purchaseID);
-      // print(purchaseDetails.transactionDate);
-      // print(purchaseDetails.verificationData.serverVerificationData);
+  Future<void> _listenToPurchaseUpdated(
+      List<PurchaseDetails> purchaseDetailsList) async {
+    for (var i = 0; i < purchaseDetailsList.length; i++) {
+      PurchaseDetails purchaseDetails = purchaseDetailsList[i];
 
+      // Mark the purchase as pending and add it to the processed set
       if (purchaseDetails.status == PurchaseStatus.pending) {
-        // _showPendingUI();
       } else {
         if (purchaseDetails.status == PurchaseStatus.error) {
+          setState(() {
+            processingPurchase = false;
+          });
+          // Handle the error if necessary
           // _handleError(purchaseDetails.error!);
         } else if (purchaseDetails.status == PurchaseStatus.purchased ||
             purchaseDetails.status == PurchaseStatus.restored) {
           bool valid = await postPurchaseVerification(purchaseDetails);
+
           if (valid) {
-            // _deliverProduct(purchaseDetails);
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const MyHomePage()),
-            );
+            await AppleStoreProductManager().loadInappPurchase();
+
+            if (SharedData().stripe_access_key.isEmpty) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const StripeConnectPage()),
+              );
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const MyHomePage()),
+              );
+            }
           } else {
+            // Handle invalid purchase
             // _handleInvalidPurchase(purchaseDetails);
           }
+
+          setState(() {
+            processingPurchase = false;
+          });
         }
+
         if (purchaseDetails.pendingCompletePurchase) {
-          await InAppPurchase.instance
-              .completePurchase(purchaseDetails);
+          await InAppPurchase.instance.completePurchase(purchaseDetails);
         }
       }
-    });
+    }
   }
 
   Future<bool> postPurchaseVerification(PurchaseDetails purchaseDetails) async {
-    final url = Uri.parse('https://gkfk5rl009.execute-api.us-east-1.amazonaws.com/default/apple-store-verify-purchase');
+    final url = Uri.parse(
+        'https://gkfk5rl009.execute-api.us-east-1.amazonaws.com/default/apple-store-verify-purchase');
 
     // Body content
-    final body = jsonEncode({
-      "receipt": purchaseDetails.verificationData.serverVerificationData
-    });
+    final body = jsonEncode(
+        {"receipt": purchaseDetails.verificationData.serverVerificationData});
 
     // POST request
     final response = await http.post(
@@ -177,9 +194,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       final Map<String, dynamic> responseBody = jsonDecode(response.body);
 
       // Replace 'fieldName' with the actual field name you want to retrieve
-      final String? originalTransactionId = responseBody['originalTransactionId'];
+      final String? originalTransactionId =
+          responseBody['originalTransactionId'];
       if (originalTransactionId != null) {
-        await updateOriginalTransactionId(appleId:  data.apple_user_identifier, originalTransactionId: originalTransactionId);
+        await updateOriginalTransactionId(
+            appleId: data.apple_user_identifier,
+            originalTransactionId: originalTransactionId);
       }
 
       return true;
@@ -204,7 +224,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               children: [
                 // Text("Length = ${selectedId}"),
                 Text(
-                  'Your free 7 days trial has ended',
+                  'Your subscription has ended',
                   style: TextStyle(
                     fontFamily: 'Urbanist',
                     fontSize: 24,
@@ -221,19 +241,28 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       ProductDetails? product = retrieveSelectedProduct();
 
                       if (product != null) {
-                        final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
-                        _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+                        setState(() {
+                          processingPurchase = true;
+                        });
+
+                        final PurchaseParam purchaseParam =
+                            PurchaseParam(productDetails: product);
+                        _inAppPurchase.buyConsumable(
+                            purchaseParam: purchaseParam);
                       }
 
                       // loadInappPurchase();
                     },
                     child: Text(
                       'SUBSCRIBE',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Urbanist',),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'Urbanist',
+                      ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF29B6F6)
-                    ),
+                        backgroundColor: const Color(0xFF29B6F6)),
                   ),
                 ),
               ],

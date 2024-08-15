@@ -17,7 +17,11 @@ class RenewalTransactionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Subscription Status'),
+        backgroundColor: Color(0xFF29B6F6),
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set the color of the back indicator
+        ),
+        title: const Text('Subscription Status', style: TextStyle(fontFamily: 'Urbanist')),
       ),
       body: ListView(
         children: [
@@ -34,12 +38,12 @@ class RenewalTransactionScreen extends StatelessWidget {
           //   subtitle: Text(transaction!.autoRenewProductId),
           // ),
           ListTile(
-            title: const Text('Product ID'),
-            subtitle: Text(transaction?.productId ?? ''),
+            title: const Text('Product ID', style: TextStyle(fontFamily: 'Urbanist')),
+            subtitle: Text(transaction?.productId ?? '', style: TextStyle(fontFamily: 'Urbanist')),
           ),
           ListTile(
-            title: const Text('Auto Renew Status'),
-            subtitle: Text(transaction?.autoRenewStatus == 0 ? "NO" : "YES"),
+            title: const Text('Auto Renew Status', style: TextStyle(fontFamily: 'Urbanist')),
+            subtitle: Text(transaction?.autoRenewStatus == 0 ? "NO" : "YES", style: TextStyle(fontFamily: 'Urbanist')),
           ),
           // ListTile(
           //   title: const Text('Is in Billing Retry Period'),
@@ -54,12 +58,12 @@ class RenewalTransactionScreen extends StatelessWidget {
           //   subtitle: Text(transaction!.environment),
           // ),
           ListTile(
-            title: const Text('Recent Subscription Start Date'),
-            subtitle: Text(_formatDate(transaction?.recentSubscriptionStartDate ?? 0)),
+            title: const Text('Recent Subscription Start Date', style: TextStyle(fontFamily: 'Urbanist')),
+            subtitle: Text(_formatDate(transaction?.recentSubscriptionStartDate ?? 0), style: TextStyle(fontFamily: 'Urbanist')),
           ),
           ListTile(
-            title: const Text('Renewal Date'),
-            subtitle: Text(_formatDate(transaction?.renewalDate ?? 0)),
+            title: const Text('Renewal Date', style: TextStyle(fontFamily: 'Urbanist')),
+            subtitle: Text(_formatDate(transaction?.renewalDate ?? 0), style: TextStyle(fontFamily: 'Urbanist')),
           ),
         ],
       ),

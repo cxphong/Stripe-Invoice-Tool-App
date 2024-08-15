@@ -319,7 +319,7 @@ class InvoiceDetailScreen extends StatelessWidget {
             children: [
               Text(
                 value,
-                  style: TextStyle(fontFamily: 'Urbanist')
+                  style: TextStyle(fontFamily: 'Urbanist', fontSize: 14.0)
                 // style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
               // Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:stripe_invoice/apple_store_products.dart';
 import 'package:stripe_invoice/renewal_transaction_screen.dart';
 import 'package:stripe_invoice/apple_signin.dart';
+import 'package:stripe_invoice/stripe_connect_page.dart';
 import 'package:stripe_invoice/subscription_screen.dart';
 import 'data.dart';
 import 'settings.dart'; // Import SettingsProvider class
@@ -69,7 +70,7 @@ class SettingsPage extends StatelessWidget {
             onTap: () async {
                   await SharedData().clearStripeAccessKey();
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => ConnectPage()),
+                    MaterialPageRoute(builder: (context) => StripeConnectPage()),
                     (Route<dynamic> route) => false,
                   );
             },
