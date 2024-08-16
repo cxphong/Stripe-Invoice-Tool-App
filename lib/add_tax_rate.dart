@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/constant.dart';
 import 'package:stripe_invoice/data.dart';
+import 'package:stripe_invoice/views/CustomInputDecoration.dart';
+import 'package:stripe_invoice/views/CustomText.dart';
 
 class AddTaxRateScreen extends StatefulWidget {
   const AddTaxRateScreen({Key? key}) : super(key: key);
@@ -47,12 +49,12 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tax rate added successfully')),
+          SnackBar(content: CustomText(text: 'Tax rate added successfully')),
         );
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add tax rate')),
+          SnackBar(content: CustomText(text: 'Failed to add tax rate')),
         );
       }
     }
@@ -62,7 +64,10 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Tax Rate'),
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set the color of the back indicator
+        ),
+        title: const CustomText(text: 'Add Tax Rate', color: Colors.white,),
         backgroundColor: Color(0xFF29B6F6),
       ),
       body: Padding(
@@ -72,7 +77,7 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
           child: ListView(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Display Name'),
+                decoration: CustomInputDecoration.inputStyle(labelText: 'Display Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a display name';
@@ -84,7 +89,7 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
                 },
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Percentage'),
+                decoration: CustomInputDecoration.inputStyle(labelText: 'Percentage'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -101,7 +106,9 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
                 },
               ),
               SwitchListTile(
-                title: Text('Inclusive'),
+                title: const CustomText(text: 'Inclusive'),
+                activeColor:  Color(0xFF29B6F6),
+                inactiveThumbColor: Colors.grey,
                 value: _inclusive,
                 onChanged: (value) {
                   setState(() {
@@ -110,11 +117,11 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
                 },
               ),
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: 'Tax Type'),
+                decoration: CustomInputDecoration.inputStyle(labelText: 'Tax Type'),
                 items: _taxTypes
                     .map((taxType) => DropdownMenuItem<String>(
                   value: taxType['value'],
-                  child: Text(taxType['label']!),
+                  child: CustomText(text: taxType['label']!),
                 ))
                     .toList(),
                 validator: (value) {
@@ -135,7 +142,29 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _addTaxRate,
-                child: Text('Add Tax Rate'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF29B6F6),
+                  // backgroundColor: Color(0xFF29B6F6),
+                  // Background color of the button
+                  // foregroundColor: Colors.white,
+                  // Text color of the button
+                  padding:
+                  EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                  // Button padding
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.circular(8.0), // Button border radius
+                  ),
+                  elevation: 3, // Elevation of the button
+                ),
+                child: const Text('Add Tax Rate',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Urbanist',
+                    // fontSize: 16.0, // Font size of the button text
+                    fontWeight:
+                    FontWeight.bold, // Font weight of the button text
+                  ),),
               ),
             ],
           ),

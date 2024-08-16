@@ -7,6 +7,8 @@ import 'package:currency_picker/currency_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:stripe_invoice/taxrate.dart';
 import 'package:stripe_invoice/data.dart';
+import 'package:stripe_invoice/views/CustomInputDecoration.dart';
+import 'package:stripe_invoice/views/CustomText.dart';
 
 class Item {
   String name;
@@ -106,9 +108,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
         selectedDueDay == null ||
         items.isEmpty ||
         selectedCurrency == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please complete all required fields.', style: TextStyle(fontFamily: 'Urbanist'))),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: CustomText(text: 'Please complete all required fields.'),
+      ));
       return;
     }
 
@@ -152,8 +154,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
       print(invoiceResponse.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(
-                'Failed to create invoice: ${invoiceResponse.statusCode}')),
+            content: CustomText(
+                text:
+                    'Failed to create invoice: ${invoiceResponse.statusCode}')),
       );
       return;
     }
@@ -185,8 +188,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
         print(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'Failed to create invoice item: ${response.statusCode}')),
+              content: CustomText(
+                  text:
+                      'Failed to create invoice item: ${response.statusCode}')),
         );
         return;
       }
@@ -204,13 +208,15 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
     if (finalizeResponse.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Invoice created and finalized successfully.')),
+            content: CustomText(
+                text: 'Invoice created and finalized successfully.')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(
-                'Failed to finalize invoice: ${finalizeResponse.statusCode}')),
+            content: CustomText(
+                text:
+                    'Failed to finalize invoice: ${finalizeResponse.statusCode}')),
       );
     }
   }
@@ -246,8 +252,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
         iconTheme: IconThemeData(
           color: Colors.white, // Set the color of the back indicator
         ),
-        title:
-            const Text('Add Invoice', style: TextStyle(color: Colors.white, fontFamily: 'Urbanist')),
+        title: const CustomText(text: 'Add Invoice'),
         backgroundColor: Color(0xFF29B6F6),
       ),
       body: Padding(
@@ -264,13 +269,11 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                       : Border.all(), // Dark theme border
                 ),
                 child: ListTile(
-                  title: const Text('Select Customer',
-                      style: TextStyle(fontFamily: 'Urbanist')),
-                  subtitle: Text(
-                      selectedCustomer != null
+                  title: const CustomText(text: 'Select Customer'),
+                  subtitle: CustomText(
+                      text: selectedCustomer != null
                           ? selectedCustomer!.name
-                          : 'No customer selected',
-                      style: TextStyle(fontFamily: 'Urbanist')),
+                          : 'No customer selected'),
                   onTap: () async {
                     final result = await Navigator.push<Customer>(
                       context,
@@ -314,21 +317,19 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     // Aligns the icon and text to the left
                     children: [
-                      Text(
-                          selectedCurrency != null
+                      CustomText(
+                          text: selectedCurrency != null
                               ? selectedCurrency!.name +
                                   " - " +
                                   selectedCurrency!.code
                               : "Select currency",
-                          style: TextStyle(color: Color(0xFF29B6F6), fontFamily: 'Urbanist')),
+                          color: Color(0xFF29B6F6)),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 16.0),
-              const Text('Item Details',
-                  // style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  style: TextStyle(fontFamily: 'Urbanist')),
+              const CustomText(text: 'Item Details'),
               const SizedBox(height: 8.0),
               ...items.map((item) {
                 int index = items.indexOf(item);
@@ -337,7 +338,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                   children: [
                     TextField(
                       style: TextStyle(fontFamily: 'Urbanist'),
-                      decoration: InputDecoration(
+                      decoration: CustomInputDecoration.inputStyle(
                         labelText: 'Item Name',
                         // filled: true,
                         // fillColor: Colors.grey[200],
@@ -351,7 +352,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                     const SizedBox(height: 8.0),
                     TextField(
                       style: TextStyle(fontFamily: 'Urbanist'),
-                      decoration: InputDecoration(
+                      decoration: CustomInputDecoration.inputStyle(
                         labelText: 'Amount in ${selectedCurrency?.code ?? ''}',
 
                         // filled: true,
@@ -368,7 +369,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                     const SizedBox(height: 8.0),
                     TextField(
                       style: TextStyle(fontFamily: 'Urbanist'),
-                      decoration: InputDecoration(
+                      decoration: CustomInputDecoration.inputStyle(
                         labelText: 'Quantity',
                         // filled: true,
                         // fillColor: Colors.grey[200],
@@ -381,13 +382,11 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                       },
                     ),
                     ListTile(
-                      title: Text('Select Tax Rate',
-                          style: TextStyle(fontFamily: 'Urbanist')),
-                      subtitle: Text(
-                          item.taxRate != null
+                      title: CustomText(text: 'Select Tax Rate'),
+                      subtitle: CustomText(
+                          text: item.taxRate != null
                               ? '${item.taxRate!.displayName} - ${item.taxRate!.percentage}%'
-                              : 'None',
-                          style: TextStyle(fontFamily: 'Urbanist')),
+                              : 'None'),
                       trailing: Icon(Icons.arrow_drop_down),
                       onTap: () => _selectTaxRate(item, index),
                     ),
@@ -411,9 +410,12 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                 ),
                 child: TextButton.icon(
                   onPressed: addItem,
-                  icon: const Icon(Icons.add, color: Color(0xFF29B6F6),),
-                  label: const Text('Add Item',
-                      style: TextStyle(fontFamily: 'Urbanist', color: Color(0xFF29B6F6))),
+                  icon: const Icon(
+                    Icons.add,
+                    color: Color(0xFF29B6F6),
+                  ),
+                  label: const CustomText(
+                      text: 'Add Item', color: Color(0xFF29B6F6)),
                 ),
               ),
               const SizedBox(height: 16.0),
@@ -429,13 +431,12 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                     child: DropdownButtonFormField<String>(
                       value: selectedDueDay,
                       style: TextStyle(fontFamily: 'Urbanist'),
-                      decoration: const InputDecoration(labelText: 'Due Days'),
+                      decoration:  CustomInputDecoration.inputStyle(labelText: 'Due Days'),
                       items: [
                         ...dueDaysOptions.map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value,
-                                style: TextStyle(fontFamily: 'Urbanist')),
+                            child: CustomText(text: value, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,),
                           );
                         }),
                         // DropdownMenuItem(
@@ -464,13 +465,11 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                       : Border.all(), // Dark theme border
                 ),
                 child: ListTile(
-                  title: const Text('Select Tax Rate for Invoice',
-                      style: TextStyle(fontFamily: 'Urbanist')),
-                  subtitle: Text(
-                      selectedInvoiceTaxRate != null
+                  title: const CustomText(text: 'Select Tax Rate for Invoice'),
+                  subtitle: CustomText(
+                      text: selectedInvoiceTaxRate != null
                           ? '${selectedInvoiceTaxRate!.displayName} - ${selectedInvoiceTaxRate!.percentage}%'
-                          : 'None',
-                      style: TextStyle(fontFamily: 'Urbanist')),
+                          : 'None'),
                   trailing: Icon(Icons.arrow_drop_down),
                   onTap: _selectTaxRateForInvoice,
                 ),
@@ -485,11 +484,11 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                 child: TextField(
                   controller: memoController,
                   style: TextStyle(fontFamily: 'Urbanist'),
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                       labelText: 'Memo',
                       contentPadding: EdgeInsets.all(8.0),
                       // filled: true,
-                      border: InputBorder.none
+                      // border: InputBorder.none
                       // fillColor: Colors.grey[200],
                       ),
                   maxLines: 3,
@@ -513,13 +512,13 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                   ),
                   elevation: 3, // Elevation of the button
                 ),
-                child: Text(
-                  'Add Invoice',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Urbanist' // Font weight of the button text
-                      ),
-                ),
+                child: Text('Add Invoice', style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Urbanist',
+                  // fontSize: 16.0, // Font size of the button text
+                  fontWeight:
+                  FontWeight.bold, // Font weight of the button text
+                ),),
               ),
             ],
           ),

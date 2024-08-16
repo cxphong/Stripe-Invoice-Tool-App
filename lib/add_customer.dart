@@ -5,6 +5,7 @@ import 'package:country_list_picker/country_list_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/constant.dart';
 import 'package:stripe_invoice/data.dart';
+import 'package:stripe_invoice/views/CustomInputDecoration.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({Key? key}) : super(key: key);
@@ -117,7 +118,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: nameController,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Name',
                     // filled: true,
                     // border: OutlineInputBorder(),
@@ -129,7 +130,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 TextFormField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: emailController,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Email',
                     // filled: true,
                     // border: OutlineInputBorder(),
@@ -160,7 +161,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 const SizedBox(height: 48.0),
                 Text(
                   'Billing Address',
-                  style: TextStyle(fontFamily: 'Urbanist'),
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600, fontFamily: 'Urbanist'),
                 ),
                 const SizedBox(height: 8.0),
                 DropdownButton<Countries>(
@@ -197,17 +198,15 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: addressLine1Controller,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Address Line 1',
-                    // filled: true,
-                    // border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: addressLine2Controller,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Address Line 2',
                     // filled: true,
                     // border: OutlineInputBorder(),
@@ -217,7 +216,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: cityController,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'City',
                     // filled: true,
                     // border: OutlineInputBorder(),
@@ -227,7 +226,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: provinceController,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Province/State',
                     // filled: true,
                     // border: OutlineInputBorder(),
@@ -237,7 +236,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: postalCodeController,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Postal Code',
                     // filled: true,
                     // border: OutlineInputBorder(),

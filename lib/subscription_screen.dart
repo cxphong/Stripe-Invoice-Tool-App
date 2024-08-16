@@ -27,7 +27,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   static const List<String> _kIds = [
     'sub_1_month',
     'sub_12_months',
-    'unlimited'
+    'unlimited',
+    'sub_free_trial'
   ];
   SharedData data = SharedData();
   bool processingPurchase = false;

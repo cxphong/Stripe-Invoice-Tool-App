@@ -124,7 +124,10 @@ class _TaxRateScreenState extends State<TaxRateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tax Rates'),
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set the color of the back indicator
+        ),
+        title: Text('Tax Rates', style: TextStyle(color: Colors.white, fontFamily: 'Urbanist')),
         backgroundColor: Color(0xFF29B6F6),
         actions: [
           IconButton(

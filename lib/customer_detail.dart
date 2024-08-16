@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/constant.dart';
 import 'package:stripe_invoice/customer.dart';
 import 'package:stripe_invoice/data.dart';
+import 'package:stripe_invoice/views/CustomInputDecoration.dart';
 
 class DetailCustomerScreen extends StatefulWidget {
   final Customer customer;
@@ -144,14 +145,14 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 TextField(
                   controller: nameController,
                   style: TextStyle(fontFamily: 'Urbanist'),
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Name',
                   ),
                 ),
                 const SizedBox(height: 16.0),
                 TextFormField(
                   controller: emailController,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Email',
                   ),
                   keyboardType: TextInputType.emailAddress,
@@ -170,7 +171,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 TextField(
                   controller: descriptionController,
                   style: TextStyle(fontFamily: 'Urbanist'),
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Description',
                   ),
                   maxLines: 3,
@@ -208,7 +209,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: addressLine1Controller,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Address Line 1',
                   ),
                 ),
@@ -216,7 +217,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: addressLine2Controller,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Address Line 2',
                   ),
                 ),
@@ -224,7 +225,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: cityController,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'City',
                   ),
                 ),
@@ -232,7 +233,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: provinceController,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Province/State',
                   ),
                 ),
@@ -240,7 +241,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: postalCodeController,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Postal Code',
                   ),
                   keyboardType: TextInputType.number,
@@ -249,7 +250,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
                 TextField(
                   style: TextStyle(fontFamily: 'Urbanist'),
                   controller: phoneNumberController,
-                  decoration: InputDecoration(
+                  decoration: CustomInputDecoration.inputStyle(
                     labelText: 'Phone Number',
                   ),
                   keyboardType: TextInputType.phone,

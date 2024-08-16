@@ -107,11 +107,7 @@ class _SettingsPageState extends State<SettingsPage> {
               style: TextStyle(fontFamily: 'Urbanist'),
             ),
             onTap: () async {
-              await SharedData().clearStripeAccessKey();
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => StripeConnectPage()),
-                    (Route<dynamic> route) => false,
-              );
+
             },
           ),
           //

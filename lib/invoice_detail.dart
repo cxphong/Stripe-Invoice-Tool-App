@@ -5,6 +5,7 @@ import 'package:stripe_invoice/custom_appbar.dart';
 import 'package:stripe_invoice/invoice.dart';
 import 'package:http/http.dart' as http;
 import 'package:stripe_invoice/progress_dialog.dart';
+import 'package:stripe_invoice/views/CustomText.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -18,8 +19,7 @@ class InvoiceDetailScreen extends StatelessWidget {
   final Invoice invoice;
   final SharedData sharedData = SharedData();
 
-  InvoiceDetailScreen({Key? key, required this.invoice})
-      : super(key: key);
+  InvoiceDetailScreen({Key? key, required this.invoice}) : super(key: key);
 
   void showProgress(BuildContext context) {
     showDialog(
@@ -159,7 +159,7 @@ class InvoiceDetailScreen extends StatelessWidget {
         iconTheme: IconThemeData(
           color: Colors.white, // Set the color of the back indicator
         ),
-        title: const Text('Invoice Details', style: TextStyle(color: Colors.white, fontFamily: 'Urbanist',)),
+        title: const CustomText(text: 'Invoice Details', color: Colors.white),
         // foregroundColor: Colors.white,
         backgroundColor: Color(0xFF29B6F6),
       ),
@@ -204,31 +204,22 @@ class InvoiceDetailScreen extends StatelessWidget {
                 children: [
                   Padding(
                     padding: EdgeInsets.all(8),
-                    child: Text('Description',
-                        style: TextStyle(
-                            fontFamily: 'Urbanist',
-                            fontSize: 14, fontWeight: FontWeight.w600)),
+                    child: CustomText(
+                        text: 'Description', fontWeight: FontWeight.w600),
                   ),
                   Padding(
                     padding: EdgeInsets.all(8),
-                    child: Text('Qty',
-                        style: TextStyle(
-                            fontFamily: 'Urbanist',
-                            fontSize: 14, fontWeight: FontWeight.w600)),
+                    child: CustomText(text: 'Qty', fontWeight: FontWeight.w600),
                   ),
                   Padding(
                     padding: EdgeInsets.all(8),
-                    child: Text('Unit price',
-                        style: TextStyle(
-                            fontFamily: 'Urbanist',
-                            fontSize: 14, fontWeight: FontWeight.w600)),
+                    child: CustomText(
+                        text: 'Unit price', fontWeight: FontWeight.w600),
                   ),
                   Padding(
                     padding: EdgeInsets.all(8),
-                    child: Text('Amount',
-                        style: TextStyle(
-                            fontFamily: 'Urbanist',
-                            fontSize: 14, fontWeight: FontWeight.w600)),
+                    child:
+                        CustomText(text: 'Amount', fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -237,22 +228,24 @@ class InvoiceDetailScreen extends StatelessWidget {
                   children: [
                     Padding(
                       padding: EdgeInsets.all(8),
-                      child: Text(
-                        decodeText(line.description != null ? line.description! : "",),
-                        style: TextStyle(fontFamily: 'Urbanist'),
+                      child: CustomText(
+                        text: decodeText(
+                          line.description != null ? line.description! : "",
+                        ),
                       ),
                     ),
                     Padding(
                       padding: EdgeInsets.all(8),
-                      child: Text(line.quantity.toString(), style: TextStyle(fontFamily: 'Urbanist')),
+                      child: CustomText(text: line.quantity.toString()),
                     ),
                     Padding(
                       padding: EdgeInsets.all(8),
-                      child: Text(line.unitPrice.toStringAsFixed(2), style: TextStyle(fontFamily: 'Urbanist')),
+                      child:
+                          CustomText(text: line.unitPrice.toStringAsFixed(2)),
                     ),
                     Padding(
                       padding: EdgeInsets.all(8),
-                      child: Text(line.amount.toStringAsFixed(2), style: TextStyle(fontFamily: 'Urbanist')),
+                      child: CustomText(text: line.amount.toStringAsFixed(2)),
                     ),
                   ],
                 );
@@ -291,12 +284,12 @@ class InvoiceDetailScreen extends StatelessWidget {
   Widget _buildActionSection(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.0),
-          border: Theme.of(context).brightness == Brightness.light
-              ? Border.all(color: Colors.grey.shade300) // Light theme border
-              : Border.all(), // Dark theme border
-        ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.0),
+        border: Theme.of(context).brightness == Brightness.light
+            ? Border.all(color: Colors.grey.shade300) // Light theme border
+            : Border.all(), // Dark theme border
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -313,13 +306,15 @@ class InvoiceDetailScreen extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          title: Text(title ,style: TextStyle(fontFamily: 'Urbanist'),),
+          title: CustomText(
+            text: title,
+          ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                value,
-                  style: TextStyle(fontFamily: 'Urbanist', fontSize: 14.0)
+              CustomText(
+                text: value,
+                fontSize: 14.0,
                 // style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
               // Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
@@ -338,7 +333,7 @@ class InvoiceDetailScreen extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          title: Text(title, style: TextStyle(fontFamily: 'Urbanist'),),
+          title: CustomText(text: title),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -374,24 +369,22 @@ class InvoiceDetailScreen extends StatelessWidget {
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(8.0))),
           // backgroundColor: Colors.white,
-          title: Text(title, style: TextStyle(fontFamily: 'Urbanist')),
-          content: Text(description, style: TextStyle(fontFamily: 'Urbanist')),
+          title: CustomText(text: title),
+          content: CustomText(text: description),
           actions: <Widget>[
             TextButton(
-              child: const Text(
-                'Cancel',
-                style:
-                    TextStyle(fontFamily: 'Urbanist', color: Color(0xFF29B6F6), fontWeight: FontWeight.bold),
-              ),
+              child: const CustomText(
+                  text: 'Cancel',
+                  color: Color(0xFF29B6F6),
+                  fontWeight: FontWeight.bold),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
             ),
             TextButton(
-              child: Text(actionTitle,
-                  style: TextStyle(
-                      fontFamily: 'Urbanist',
-                      color: Colors.red, fontWeight: FontWeight.bold)),
+              child: CustomText(text: actionTitle,
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
                 onDelete(); // Call the delete callback
@@ -411,7 +404,8 @@ class InvoiceDetailScreen extends StatelessWidget {
     if (status == 'draft') {
       actions.addAll([
         _buildActionListItem(context, 'Delete Invoice', false, invoice),
-        _buildActionListItem(context, 'Finalize Invoice', invoice.invoicePdf == null, invoice),
+        _buildActionListItem(
+            context, 'Finalize Invoice', invoice.invoicePdf == null, invoice),
       ]);
     } else if (status == 'open') {
       actions.addAll([
@@ -419,12 +413,14 @@ class InvoiceDetailScreen extends StatelessWidget {
         _buildActionListItem(context, 'Send Reminder Email', false, invoice),
         _buildActionListItem(
             context, 'Mark Uncollectible Invoice', false, invoice),
-        _buildActionListItem(context, 'Cancel Invoice', invoice.invoicePdf == null, invoice),
+        _buildActionListItem(
+            context, 'Cancel Invoice', invoice.invoicePdf == null, invoice),
       ]);
     } else if (status == 'uncollectible') {
       actions.addAll([
         _buildActionListItem(context, 'Cancel Invoice', false, invoice),
-        _buildActionListItem(context, 'Pay Invoice', invoice.invoicePdf == null, invoice),
+        _buildActionListItem(
+            context, 'Pay Invoice', invoice.invoicePdf == null, invoice),
       ]);
     }
 
@@ -461,14 +457,15 @@ class InvoiceDetailScreen extends StatelessWidget {
                 final response = await voidInvoice(invoice.id);
                 if (response != null && response?.statusCode == 200) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Canceled invoice succeeded", style: TextStyle(fontFamily: 'Urbanist'))));
+                      content: CustomText(text: "Canceled invoice succeeded",
+                          )));
                 } else {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text(response!.body, style: TextStyle(fontFamily: 'Urbanist'))));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: CustomText(text: response!.body)));
                 }
               } catch (e) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(e.toString(), style: TextStyle(fontFamily: 'Urbanist'))));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: CustomText(text: e.toString())));
               }
             });
           } else if (text == "Mark Uncollectible Invoice") {
@@ -481,16 +478,16 @@ class InvoiceDetailScreen extends StatelessWidget {
                 final response = await markUncollectibleInvoice(invoice.id);
                 if (response != null && response?.statusCode == 200) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text(
-                          "Marked the invoice as uncollectible succeeded",
-                          style: TextStyle(fontFamily: 'Urbanist'))));
+                      content: CustomText(
+                          text: "Marked the invoice as uncollectible succeeded",
+                          )));
                 } else {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text(response!.body, style: TextStyle(fontFamily: 'Urbanist'))));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: CustomText(text: response!.body)));
                 }
               } catch (e) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(e.toString(), style: TextStyle(fontFamily: 'Urbanist'))));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: CustomText(text: e.toString())));
               }
             });
           } else if (text == "Finalize Invoice") {
@@ -503,14 +500,19 @@ class InvoiceDetailScreen extends StatelessWidget {
                 final response = await finalizeInvoice(invoice.id);
                 if (response != null && response?.statusCode == 200) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Finalized  invoice succeeded", style: TextStyle(fontFamily: 'Urbanist'))));
+                      content: CustomText(text: "Finalized  invoice succeeded",
+                          )));
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(jsonDecode(response!.body, ), style: TextStyle(fontFamily: 'Urbanist'))));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: CustomText(
+                          text: jsonDecode(
+                            response!.body,
+                          ),
+                          )));
                 }
               } catch (e) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(e.toString(), style: TextStyle(fontFamily: 'Urbanist'))));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: CustomText(text: e.toString())));
               }
             });
           } else if (text == "Delete Invoice") {
@@ -525,14 +527,16 @@ class InvoiceDetailScreen extends StatelessWidget {
                   final response = await deleteDraftInvoice(invoice.id);
                   if (response != null && response?.statusCode == 200) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text("Delete  invoice succeeded", style: TextStyle(fontFamily: 'Urbanist'))));
+                        content: CustomText(text: "Delete  invoice succeeded",
+                            )));
                   } else {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(response!.body, style: TextStyle(fontFamily: 'Urbanist'))));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: CustomText(text: response!.body)));
                   }
                 } catch (e) {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text(e.toString(), style: TextStyle(fontFamily: 'Urbanist'))));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: CustomText(text: e.toString(),
+                          )));
                 }
               },
             );
@@ -542,27 +546,30 @@ class InvoiceDetailScreen extends StatelessWidget {
             try {
               final response = await sendInvoice(invoice.id);
               if (response != null && response?.statusCode == 200) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Send invoice succeeded", style: TextStyle(fontFamily: 'Urbanist'))));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: CustomText(text: "Send invoice succeeded",
+                        )));
               } else {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(response!.body, style: TextStyle(fontFamily: 'Urbanist'))));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: CustomText(text: response!.body,
+                        )));
               }
             } catch (e) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(e.toString(), style: TextStyle(fontFamily: 'Urbanist'))));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: CustomText(text: e.toString(),
+                      )));
             }
           }
         },
         child: Column(
           children: [
             ListTile(
-              title: Text(text, style: TextStyle(fontFamily: 'Urbanist', color: Color(0xFF29B6F6))),
+              title: CustomText(text: text,
+                  color: Color(0xFF29B6F6)),
               trailing:
                   Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
             ),
-            if (!isLastItem)
-              Divider(),
+            if (!isLastItem) Divider(),
           ],
         ),
       ),

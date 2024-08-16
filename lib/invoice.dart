@@ -6,6 +6,7 @@ import 'package:stripe_invoice/invoice_detail.dart';
 import 'package:stripe_invoice/constant.dart';
 import 'package:stripe_invoice/settings-page.dart';
 import 'package:stripe_invoice/data.dart';
+import 'package:stripe_invoice/views/CustomText.dart';
 
 class LineItem {
   final String? description;
@@ -206,7 +207,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Invoices', style: TextStyle(color: Colors.white, fontFamily: 'Urbanist',)),
+        title: const CustomText(text: 'Invoices', color: Colors.white,),
         backgroundColor: Color(0xFF29B6F6),
         leading: IconButton(
           color: Colors.white,
@@ -263,7 +264,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                   (String value) {
                                 return DropdownMenuItem<String>(
                                   value: value,
-                                  child: Text(value),
+                                  child: CustomText(text: value),
                                 );
                               }).toList(),
                               isExpanded: true,
@@ -306,7 +307,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ChoiceChip(
-                            label: Text('Customer', style: TextStyle(fontFamily: 'Urbanist'),),
+                            label: CustomText(text: 'Customer'),
                             selected: _searchType == 'customer',
                             onSelected: (bool selected) {
                               setState(() {
@@ -317,7 +318,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           ),
                           SizedBox(width: 8),
                           ChoiceChip(
-                            label: Text('Status', style: TextStyle(fontFamily: 'Urbanist')),
+                            label: CustomText(text: 'Status'),
                             selected: _searchType == 'status',
                             onSelected: (bool selected) {
                               setState(() {
@@ -328,7 +329,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           ),
                           SizedBox(width: 8),
                           ChoiceChip(
-                            label: Text('Amount', style: TextStyle(fontFamily: 'Urbanist')),
+                            label: CustomText(text: 'Amount'),
                             selected: _searchType == 'amount',
                             onSelected: (bool selected) {
                               setState(() {
@@ -349,7 +350,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         children: [
           _invoices.isEmpty
               ? const Center(
-                  child: Text("No invoice data"),
+                  child: CustomText(text: "No invoice data"),
                 )
               : NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification scrollInfo) {
@@ -410,9 +411,11 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        invoice.customerName,
-                                        style: const TextStyle(fontSize: 16),
+                                      CustomText(
+                                        text: invoice.customerName,
+                                        fontSize: 16.0,
+                                        // color: Colors.black,
+                                        // style: const TextStyle(fontSize: 16),
                                       ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
@@ -442,13 +445,9 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
                                             return SizedBox(
                                               width: uncollectibleWidth,
-                                              child: Text(
-                                                    invoice.status,
-                                                style: const TextStyle(
-                                                    fontSize: 14),
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 1,
-                                                textAlign: TextAlign.center,
+                                              child: CustomText(
+                                                    align: TextAlign.center,
+                                                    text: invoice.status,
                                               ),
                                             );
                                           },
@@ -461,13 +460,11 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        '${invoice.currency.toUpperCase()} \$${invoice.amountDue.toStringAsFixed(2)}',
-                                        style: const TextStyle(fontSize: 14),
+                                      CustomText(
+                                        text: '${invoice.currency.toUpperCase()} \$${invoice.amountDue.toStringAsFixed(2)}',
                                       ),
-                                      Text(
-                                        _formatDate(invoice.periodEnd),
-                                        style: const TextStyle(fontSize: 14),
+                                      CustomText(
+                                        text: _formatDate(invoice.periodEnd),
                                       ),
                                     ],
                                   ),
