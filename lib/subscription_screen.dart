@@ -22,14 +22,7 @@ class SubscriptionScreen extends StatefulWidget {
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
-  List<ProductDetails> productDetails = [];
   late int selectedId;
-  static const List<String> _kIds = [
-    'sub_1_month',
-    'sub_12_months',
-    'unlimited',
-    'sub_free_trial'
-  ];
   SharedData data = SharedData();
   bool processingPurchase = false;
 
@@ -44,12 +37,13 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       }
     });
     selectedId = 1;
-    loadInappPurchase();
+    // loadInappPurchase();
     _completePendingTransactions();
   }
 
   Future<void> _completePendingTransactions() async {
-    final Stream<List<PurchaseDetails>> purchaseStream = _inAppPurchase.purchaseStream;
+    final Stream<List<PurchaseDetails>> purchaseStream =
+        _inAppPurchase.purchaseStream;
     final List<PurchaseDetails> pendingPurchases = await purchaseStream.first;
 
     for (PurchaseDetails purchase in pendingPurchases) {
@@ -74,7 +68,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         'https://8n5whw25p0.execute-api.us-east-1.amazonaws.com/default/stripe-admin-apple-users';
 
     final Map<String, dynamic> requestBody = {
-      'apple_id': "001818.21b0770e1602420788aa4ce5a89bccee.0848", //appleId,
+      'apple_id': SharedData().apple_user_identifier, //appleId,
       'original_transaction_id': originalTransactionId,
     };
 
@@ -106,33 +100,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     }
   }
 
-  void loadInappPurchase() async {
-    final ProductDetailsResponse response =
-        await _inAppPurchase.queryProductDetails(_kIds.toSet());
-
-    setState(() {
-      // print (response.notFoundIDs);
-      productDetails = response.productDetails;
-      for (var value in response.productDetails) {
-        print(value.description);
-        print(value.price);
-        print(value.title);
-        print(value.currencyCode);
-        print(value.currencySymbol);
-        print(value.id);
-        print(value.rawPrice);
-      }
-    });
-  }
-
   ProductDetails? retrieveSelectedProduct() {
-    for (var value in productDetails) {
-      if (_kIds[selectedId] == value.id) {
-        return value;
-      }
-    }
-
-    return null;
+    return AppleStoreProductManager().productDetails[selectedId];
   }
 
   Future<void> _listenToPurchaseUpdated(
@@ -254,83 +223,64 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         children: [
           Container(
             width: double.infinity,
-            // Ensures the container takes up the full width
             color: Colors.white,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Text("Length = ${selectedId}"),
-                Text(
-                  'Your subscription has ended',
-                  style: TextStyle(
-                    fontFamily: 'Urbanist',
-                    fontSize: 24,
-                    color: const Color(0xFF29B6F6),
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(24.0)),
-                SubscriptionList(selectedId: selectedId, onTap: onTap),
-                Padding(padding: EdgeInsets.all(24.0)),
-                FractionallySizedBox(
-                  widthFactor: 0.65, // 65% of the width
-                  child: ElevatedButton(
-                    onPressed: () {
-                      ProductDetails? product = retrieveSelectedProduct();
-
-                      if (product != null) {
-                        setState(() {
-                          processingPurchase = true;
-                        });
-
-                        // showProgress(context);
-                        final PurchaseParam purchaseParam =
-                            PurchaseParam(productDetails: product);
-                        _inAppPurchase.buyConsumable(
-                            purchaseParam: purchaseParam);
-                      }
-
-                      // loadInappPurchase();
-                    },
-                    child: Text(
-                      'SUBSCRIBE',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontFamily: 'Urbanist',
-                      ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.2), // Add some top padding if needed
+                  Text(
+                    'Select your subscription',
+                    style: TextStyle(
+                      fontFamily: 'Urbanist',
+                      fontSize: 24,
+                      color: const Color(0xFF29B6F6),
                     ),
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF29B6F6)),
                   ),
-                ),
-              ],
+                  Padding(padding: EdgeInsets.all(24.0)),
+                  SubscriptionList(
+                    selectedId: selectedId,
+                    onTap: onTap,
+                    productDetails: AppleStoreProductManager().productDetails,
+                  ),
+                  Padding(padding: EdgeInsets.all(24.0)),
+                  FractionallySizedBox(
+                    widthFactor: 0.65, // 65% of the width
+                    child: ElevatedButton(
+                      onPressed: () {
+                        ProductDetails? product = retrieveSelectedProduct();
+
+                        if (product != null) {
+                          setState(() {
+                            processingPurchase = true;
+                          });
+
+                          final PurchaseParam purchaseParam =
+                          PurchaseParam(productDetails: product);
+                          _inAppPurchase.buyConsumable(
+                              purchaseParam: purchaseParam);
+                        }
+                      },
+                      child: Text(
+                        'SUBSCRIBE',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontFamily: 'Urbanist',
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF29B6F6)),
+                    ),
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.2), // Add some bottom padding if needed
+                ],
+              ),
             ),
           ),
-          // Positioned(
-          //   top: 50.0,
-          //   left: 20.0,
-          //   child: GestureDetector(
-          //     onTap: () {
-          //       Navigator.of(context).pop(); // Close the screen
-          //     },
-          //     child: Container(
-          //       decoration: const BoxDecoration(
-          //         shape: BoxShape.circle,
-          //         color: Colors.black26, // Circle color
-          //       ),
-          //       child: const Padding(
-          //         padding: EdgeInsets.all(8.0),
-          //         child: Icon(
-          //           Icons.close,
-          //           color: Colors.white, // X icon color
-          //           size: 24.0,
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
   }
+
 }

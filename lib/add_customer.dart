@@ -83,6 +83,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           const SnackBar(
               content: Text('Customer created successfully.')),
         );
+        Navigator.of(context).pop();
       } else {
         print('Failed to create customer. Status code: ${response.statusCode}');
         print('Response body: ${response.body}');

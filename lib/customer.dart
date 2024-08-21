@@ -247,7 +247,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => AddCustomerScreen()),
-              );
+              ).then((value) => _fetchCustomers(refresh: true));
             },
           ),
         ],

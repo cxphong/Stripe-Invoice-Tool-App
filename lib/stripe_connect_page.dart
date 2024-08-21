@@ -28,9 +28,10 @@ class _StripeConnectPageState extends State<StripeConnectPage> {
 
   void _launchURL() async {
     // test
-    const url =
-        "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QGyQGNJXP9thoJSAjHI6qrJVsdmXGSFy&scope=read_write";
-    // const url = 'https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QXRvRNoljHiCK1Tr3GYqOyZlxrpUutdB&scope=read_write';
+    // const url =
+    //     "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QGyQGNJXP9thoJSAjHI6qrJVsdmXGSFy&scope=read_write";
+    const url = 'https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QXRvRNoljHiCK1Tr3GYqOyZlxrpUutdB&scope=read_write';
+    https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QXRvRNoljHiCK1Tr3GYqOyZlxrpUutdB&scope=read_write
 
     // Start the authentication flow
     final result = await FlutterWebAuth.authenticate(

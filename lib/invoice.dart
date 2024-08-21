@@ -240,7 +240,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => AddInvoiceScreen()),
-              );
+              ).then((value) async => await _fetchInvoices(isRefreshing: true));
             },
           ),
         ],

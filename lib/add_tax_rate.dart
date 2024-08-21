@@ -64,7 +64,7 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Colors.white, // Set the color of the back indicator
         ),
         title: const CustomText(text: 'Add Tax Rate', color: Colors.white,),
@@ -107,7 +107,7 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
               ),
               SwitchListTile(
                 title: const CustomText(text: 'Inclusive'),
-                activeColor:  Color(0xFF29B6F6),
+                activeColor:  const Color(0xFF29B6F6),
                 inactiveThumbColor: Colors.grey,
                 value: _inclusive,
                 onChanged: (value) {
@@ -139,7 +139,7 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
                   _selectedTaxType = value!;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _addTaxRate,
                 style: ElevatedButton.styleFrom(

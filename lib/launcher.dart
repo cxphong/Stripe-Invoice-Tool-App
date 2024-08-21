@@ -44,14 +44,19 @@ class _LauncherScreenState extends State<LauncherScreen> {
         MaterialPageRoute(builder: (context) => FreeTrialPage()),
       );
     } else {
-      // print ("zzz = ${AppleStoreProductManager().renewalTransaction!.expirationIntent}");
-      if (AppleStoreProductManager().renewalTransaction != null &&
-      AppleStoreProductManager().renewalTransaction!.expirationIntent != 0) {
+      if (AppleStoreProductManager().lastTransaction == null &&
+          AppleStoreProductManager().renewalTransaction == null) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => SubscriptionScreen()),
         );
-      } else {
+        return;
+      }
+
+      // Purchased unlimited
+      if (AppleStoreProductManager().lastTransaction != null &&
+          AppleStoreProductManager().lastTransaction?.productId ==
+              "unlimited_time") {
         if (SharedData().stripe_access_key.isEmpty) {
           Navigator.pushReplacement(
             context,
@@ -62,6 +67,27 @@ class _LauncherScreenState extends State<LauncherScreen> {
             context,
             MaterialPageRoute(builder: (context) => MyHomePage()),
           );
+        }
+      } else {
+        if (AppleStoreProductManager().renewalTransaction != null &&
+            AppleStoreProductManager().renewalTransaction!.expirationIntent !=
+                0) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => SubscriptionScreen()),
+          );
+        } else {
+          if (SharedData().stripe_access_key.isEmpty) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => StripeConnectPage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => MyHomePage()),
+            );
+          }
         }
       }
     }

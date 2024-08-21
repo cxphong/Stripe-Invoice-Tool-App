@@ -82,8 +82,8 @@ class _PaymentScreenState extends State<CreateStripePayment> {
         paymentSheetParameters: SetupPaymentSheetParameters(
       customFlow: false,
       paymentIntentClientSecret: clientSecret,
-      merchantDisplayName: 'Flutter Stripe Store Demo',
-      style: ThemeMode.dark,
+      merchantDisplayName: 'Infinium',
+      style: Theme.of(context).brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark,
     ));
 
     Stripe.instance.presentPaymentSheet();

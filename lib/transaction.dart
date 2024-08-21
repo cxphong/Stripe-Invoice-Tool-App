@@ -1,4 +1,4 @@
-class Transaction {
+class LastTransaction {
   final String transactionId;
   final String originalTransactionId;
   final String webOrderLineItemId;
@@ -19,7 +19,7 @@ class Transaction {
   final int price;
   final String currency;
 
-  Transaction({
+  LastTransaction({
     required this.transactionId,
     required this.originalTransactionId,
     required this.webOrderLineItemId,
@@ -41,17 +41,17 @@ class Transaction {
     required this.currency,
   });
 
-  factory Transaction.fromJson(Map<String, dynamic> json) {
-    return Transaction(
-      transactionId: json['transactionId'],
-      originalTransactionId: json['originalTransactionId'],
-      webOrderLineItemId: json['webOrderLineItemId'],
-      bundleId: json['bundleId'],
-      productId: json['productId'],
-      subscriptionGroupIdentifier: json['subscriptionGroupIdentifier'],
-      purchaseDate: json['purchaseDate'],
-      originalPurchaseDate: json['originalPurchaseDate'],
-      expiresDate: json['expiresDate'],
+  factory LastTransaction.fromJson(Map<String, dynamic> json) {
+    return LastTransaction(
+      transactionId: json['transactionId'] ?? "",
+      originalTransactionId: json['originalTransactionId'] ?? "",
+      webOrderLineItemId: json['webOrderLineItemId'] ?? "",
+      bundleId: json['bundleId'] ?? "",
+      productId: json['productId'] ?? "",
+      subscriptionGroupIdentifier: json['subscriptionGroupIdentifier'] ?? "",
+      purchaseDate: json['purchaseDate'] ?? "",
+      originalPurchaseDate: json['originalPurchaseDate'] ?? "",
+      expiresDate: json['expiresDate'] ?? 0,
       quantity: json['quantity'],
       type: json['type'],
       inAppOwnershipType: json['inAppOwnershipType'],

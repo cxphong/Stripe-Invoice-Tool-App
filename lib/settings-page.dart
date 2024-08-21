@@ -11,7 +11,6 @@ import 'settings.dart'; // Import SettingsProvider class
 import 'main.dart'; // Import MyApp class for navigation
 
 class SettingsPage extends StatefulWidget {
-
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
@@ -43,13 +42,15 @@ class _SettingsPageState extends State<SettingsPage> {
         iconTheme: IconThemeData(
           color: Colors.white, // Set the color of the back indicator
         ),
-        title: Text('Settings', style: TextStyle(color: Colors.white, fontFamily: 'Urbanist')),
+        title: Text('Settings',
+            style: TextStyle(color: Colors.white, fontFamily: 'Urbanist')),
       ),
       body: ListView(
         children: [
           ListTile(
             title: Text('Theme', style: TextStyle(fontFamily: 'Urbanist')),
-            subtitle: Text('Select App Theme', style: TextStyle(fontFamily: 'Urbanist')),
+            subtitle: Text('Select App Theme',
+                style: TextStyle(fontFamily: 'Urbanist')),
             trailing: DropdownButton<ThemeMode>(
               value: Provider.of<SettingsProvider>(context).themeMode,
               onChanged: (ThemeMode? newTheme) {
@@ -61,11 +62,15 @@ class _SettingsPageState extends State<SettingsPage> {
               items: [
                 DropdownMenuItem(
                   value: ThemeMode.system,
-                  child: Text('System Default', style: TextStyle(fontFamily: 'Urbanist'),),
+                  child: Text(
+                    'System Default',
+                    style: TextStyle(fontFamily: 'Urbanist'),
+                  ),
                 ),
                 DropdownMenuItem(
                   value: ThemeMode.light,
-                  child: Text('Light', style: TextStyle(fontFamily: 'Urbanist')),
+                  child:
+                      Text('Light', style: TextStyle(fontFamily: 'Urbanist')),
                 ),
                 DropdownMenuItem(
                   value: ThemeMode.dark,
@@ -74,31 +79,35 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             ),
           ),
-          ListTile(
-            title: Text(
-              'Subscription',
-                style: TextStyle(fontFamily: 'Urbanist')
-              // style: TextStyle(color: Colors.s),
+          if (AppleStoreProductManager().lastTransaction != null &&
+              AppleStoreProductManager().lastTransaction?.productId !=
+                  "unlimited_time")
+            ListTile(
+              title:
+                  Text('Subscription', style: TextStyle(fontFamily: 'Urbanist')
+                      // style: TextStyle(color: Colors.s),
+                      ),
+              subtitle: Text(
+                  AppleStoreProductManager().renewalTransaction?.productId ??
+                      ""),
+              onTap: () async {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => RenewalTransactionScreen(
+                        transaction:
+                            AppleStoreProductManager().renewalTransaction)));
+              },
             ),
-            subtitle: Text(AppleStoreProductManager().renewalTransaction?.productId ?? ""),
-            onTap: () async {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) =>
-                    RenewalTransactionScreen(transaction:
-                AppleStoreProductManager().renewalTransaction)));
-            },
-          ),
           ListTile(
             title: Text(
               'Disconnect Stripe',
               style: TextStyle(fontFamily: 'Urbanist'),
             ),
             onTap: () async {
-                  await SharedData().clearStripeAccessKey();
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => StripeConnectPage()),
-                    (Route<dynamic> route) => false,
-                  );
+              await SharedData().clearStripeAccessKey();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => StripeConnectPage()),
+                (Route<dynamic> route) => false,
+              );
             },
           ),
           ListTile(
@@ -106,9 +115,7 @@ class _SettingsPageState extends State<SettingsPage> {
               'iOS App version ${_version}+${_buildNumber}',
               style: TextStyle(fontFamily: 'Urbanist'),
             ),
-            onTap: () async {
-
-            },
+            onTap: () async {},
           ),
           //
           // ListTile(

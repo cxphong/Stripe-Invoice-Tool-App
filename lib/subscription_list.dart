@@ -1,13 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'subscription.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 
 class SubscriptionList extends StatefulWidget {
   int selectedId;
   final void Function(int) onTap;
+  final List<ProductDetails> productDetails;
 
-  SubscriptionList({Key? key, required this.selectedId, required this.onTap}) : super(key: key);
+  SubscriptionList({
+    Key? key,
+    required this.selectedId,
+    required this.onTap,
+    required this.productDetails,
+  }) : super(key: key);
 
   @override
   State<SubscriptionList> createState() => _SubscriptionListState();
@@ -16,27 +22,8 @@ class SubscriptionList extends StatefulWidget {
 class _SubscriptionListState extends State<SubscriptionList> {
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  String getPlanDescription(int id) {
-    switch (id) {
-      case 0:
-        return 'Monthly renewal with the flexibility to cancel anytime.';
-      case 1:
-        return 'Yearly renewal with the flexibility to cancel anytime.';
-      case 2:
-        return 'One-time payment with no recurring charges.';
-      default:
-        return "";
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    String planDescription = getPlanDescription(widget.selectedId);
+    print('product length =  ${widget.productDetails.length}');
 
     return Padding(
       padding: EdgeInsets.all(8.0),
@@ -45,54 +32,27 @@ class _SubscriptionListState extends State<SubscriptionList> {
         children: [
           Container(
             height: 150.0, // Set a fixed height for the Subscription widgets
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Container(
-                    height: double.infinity, // Ensure full height
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: widget.productDetails.map((productDetail) {
+                  int index = widget.productDetails.indexOf(productDetail);
+                  return Container(
+                    width: 125.0, // Fixed width for each Subscription widget
+                    margin: EdgeInsets.only(right: 8.0), // Space between items
                     child: Subscription(
-                      id: 0,
-                      text1: "1",
-                      text2: "MONTH",
-                      text3: "\$19.99",
-                      text4: "\$4.6 per week",
+                      id: index,
+                      text1: _getText1(productDetail),
+                      text2: _getText2(productDetail),
+                      text3: productDetail.price,
+                      text4: _getText4(productDetail),
                       onTap: widget.onTap,
                       selectedId: widget.selectedId,
                     ),
-                  ),
-                ),
-                SizedBox(width: 4.0),
-                Expanded(
-                  child: Container(
-                    height: double.infinity, // Ensure full height
-                    child: Subscription(
-                      id: 1,
-                      text1: "12",
-                      text2: "MONTHS",
-                      text3: "\$199",
-                      text4: "\$3.8 per week",
-                      onTap: widget.onTap,
-                      selectedId: widget.selectedId,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 4.0),
-                Expanded(
-                  child: Container(
-                    height: double.infinity, // Ensure full height
-                    child: Subscription(
-                      id: 2,
-                      text1: "∞",
-                      text2: "UNLIMITED",
-                      text3: "\$499",
-                      text4: "Best saving",
-                      onTap: widget.onTap,
-                      selectedId: widget.selectedId,
-                    ),
-                  ),
-                ),
-              ],
+                  );
+                }).toList(),
+              ),
             ),
           ),
           Padding(
@@ -102,7 +62,7 @@ class _SubscriptionListState extends State<SubscriptionList> {
               child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
-                  planDescription,
+                  _getPlanDescription(widget.selectedId),
                   style: TextStyle(
                       fontFamily: 'Urbanist',
                       fontSize: 16,
@@ -114,5 +74,36 @@ class _SubscriptionListState extends State<SubscriptionList> {
         ],
       ),
     );
+  }
+
+  String _getText1(ProductDetails productDetail) {
+    // Custom logic to extract text1 from productDetail
+    return productDetail.title.split(" ")[0]; // Example
+  }
+
+  String _getText2(ProductDetails productDetail) {
+    // Custom logic to extract text2 from productDetail
+    return productDetail.title; // Example
+  }
+
+  String _getText4(ProductDetails productDetail) {
+    // Custom logic to extract text4 (description) from productDetail
+    return "Best deal"; // Example, you can customize based on productDetail
+  }
+
+  String _getPlanDescription(int id) {
+    // Custom logic to generate plan description
+    switch (id) {
+      case 0:
+        return 'Monthly renewal with the flexibility to cancel anytime.';
+      case 1:
+        return "6-month renewal with the option to cancel anytime.";
+      case 2:
+        return 'Yearly renewal with the flexibility to cancel anytime.';
+      case 3:
+        return 'One-time payment with no recurring charges.';
+      default:
+        return "";
+    }
   }
 }

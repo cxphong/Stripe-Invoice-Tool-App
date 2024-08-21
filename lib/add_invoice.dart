@@ -211,6 +211,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
             content: CustomText(
                 text: 'Invoice created and finalized successfully.')),
       );
+      Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
