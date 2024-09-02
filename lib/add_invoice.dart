@@ -253,7 +253,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
         iconTheme: IconThemeData(
           color: Colors.white, // Set the color of the back indicator
         ),
-        title: const CustomText(text: 'Add Invoice'),
+        title: const CustomText(text: 'Add Invoice', color: Colors.white),
         backgroundColor: Color(0xFF29B6F6),
       ),
       body: Padding(

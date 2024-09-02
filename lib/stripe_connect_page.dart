@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:stripe_invoice/demo_manager.dart';
 import 'package:stripe_invoice/subscription_screen.dart';
 
 import 'apps.dart';
@@ -20,18 +21,13 @@ class _StripeConnectPageState extends State<StripeConnectPage> {
   SharedData sharedData = SharedData();
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
   void _launchURL() async {
     // test
     // const url =
     //     "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QGyQGNJXP9thoJSAjHI6qrJVsdmXGSFy&scope=read_write";
-    const url = 'https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QXRvRNoljHiCK1Tr3GYqOyZlxrpUutdB&scope=read_write';
-    https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QXRvRNoljHiCK1Tr3GYqOyZlxrpUutdB&scope=read_write
+    const url =
+        'https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QXRvRNoljHiCK1Tr3GYqOyZlxrpUutdB&scope=read_write';
+    https: //connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_QXRvRNoljHiCK1Tr3GYqOyZlxrpUutdB&scope=read_write
 
     // Start the authentication flow
     final result = await FlutterWebAuth.authenticate(
@@ -113,6 +109,40 @@ class _StripeConnectPageState extends State<StripeConnectPage> {
                 ),
               ),
             ),
+            if (DemoManager().demo)
+              Padding(padding: const EdgeInsets.all(18.0),
+                child:
+              Container(
+                color: Colors.grey,
+                child: Column(
+                  children: [
+                    Text("Available only for the build version under review."),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MyHomePage()),
+                        );
+                      },
+                      // style: ElevatedButton.styleFrom(
+                      //   primary: Colors.white,
+                      //   onPrimary: Color(0xFF29B6F6),
+                      // ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF29B6F6), // Background color
+                      ),
+                      child: Text(
+                        'Demonstration mode',
+                        style: TextStyle(
+                          color: Colors.white,
+                          backgroundColor: Color(0xFF29B6F6),
+                          fontFamily: 'Urbanist',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ), ),
             Spacer(),
           ],
         ),

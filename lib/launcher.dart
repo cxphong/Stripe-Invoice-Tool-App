@@ -4,7 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:stripe_invoice/freetrial.dart';
+import 'package:stripe_invoice/create_account_screen.dart';
+import 'package:stripe_invoice/demo_manager.dart';
 import 'package:stripe_invoice/stripe_connect_page.dart';
 import 'package:stripe_invoice/subscription_screen.dart';
 
@@ -37,13 +38,19 @@ class _LauncherScreenState extends State<LauncherScreen> {
     await SharedData().loadAppleUserIdentifier();
     await AppleStoreProductManager().loadInappPurchase();
     await AppleStoreProductManager().loadSubscriptionStatus();
+    await DemoManager().checkDemoMode();
+
+    print ("Apple identify = ${SharedData().apple_user_identifier}");
 
     if (SharedData().apple_user_identifier.isEmpty) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => FreeTrialPage()),
+        MaterialPageRoute(builder: (context) => CreateAccountPage()),
       );
     } else {
+      print (AppleStoreProductManager().lastTransaction);
+      print (AppleStoreProductManager().renewalTransaction);
+
       if (AppleStoreProductManager().lastTransaction == null &&
           AppleStoreProductManager().renewalTransaction == null) {
         Navigator.pushReplacement(

@@ -63,6 +63,7 @@ class _SubscriptionListState extends State<SubscriptionList> {
                 padding: EdgeInsets.all(16.0),
                 child: Text(
                   _getPlanDescription(widget.selectedId),
+                  // widget.productDetails[widget.selectedId].description,
                   style: TextStyle(
                       fontFamily: 'Urbanist',
                       fontSize: 16,
@@ -88,18 +89,19 @@ class _SubscriptionListState extends State<SubscriptionList> {
 
   String _getText4(ProductDetails productDetail) {
     // Custom logic to extract text4 (description) from productDetail
-    return "Best deal"; // Example, you can customize based on productDetail
+    // return "Best deal"; // Example, you can customize based on productDetail
+    return "";
   }
 
   String _getPlanDescription(int id) {
     // Custom logic to generate plan description
     switch (id) {
       case 0:
-        return 'Monthly renewal with the flexibility to cancel anytime.';
+        return '- Monthly renewal with the flexibility to cancel anytime.\n- 7 days free trial';
       case 1:
-        return "6-month renewal with the option to cancel anytime.";
+        return "- 6-month renewal with the option to cancel anytime.\n- 7 days free trial";
       case 2:
-        return 'Yearly renewal with the flexibility to cancel anytime.';
+        return '- Yearly renewal with the flexibility to cancel anytime.\n- 7 days free trial';
       case 3:
         return 'One-time payment with no recurring charges.';
       default:

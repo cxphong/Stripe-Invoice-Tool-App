@@ -2,16 +2,19 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:stripe_invoice/apple_store_products.dart';
 import 'package:stripe_invoice/apps.dart';
 import 'package:stripe_invoice/data.dart';
+import 'package:stripe_invoice/demo_manager.dart';
 import 'package:stripe_invoice/progress_dialog.dart';
 import 'package:stripe_invoice/stripe_connect_page.dart';
 import 'package:stripe_invoice/subscription.dart';
 import 'package:stripe_invoice/subscription_list.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({Key? key}) : super(key: key);
@@ -128,17 +131,25 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           if (valid) {
             await AppleStoreProductManager().loadSubscriptionStatus();
 
-            if (SharedData().stripe_access_key.isEmpty) {
+            if (DemoManager().demo) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                     builder: (context) => const StripeConnectPage()),
               );
             } else {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const MyHomePage()),
-              );
+              if (SharedData().stripe_access_key.isEmpty) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const StripeConnectPage()),
+                );
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyHomePage()),
+                );
+              }
             }
           } else {
             // Handle invalid purchase
@@ -228,15 +239,60 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.2), // Add some top padding if needed
-                  Text(
-                    'Select your subscription',
-                    style: TextStyle(
-                      fontFamily: 'Urbanist',
-                      fontSize: 24,
-                      color: const Color(0xFF29B6F6),
+                  SizedBox(
+                      height: MediaQuery.of(context).size.height *
+                          0.2), // Add some top padding if needed
+                  Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      "Please select a subscription to access and use all features of the app.",
+                      style: TextStyle(
+                        fontFamily: 'Urbanist',
+                        fontSize: 18,
+                        color: const Color(0xFF29B6F6),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
+                  Padding(padding: EdgeInsets.all(8.0)),
+                  RichText(
+                    text: TextSpan(
+                      text: 'Term of use',
+                      style: TextStyle(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () async {
+                          const url =
+                              "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+                          if (await canLaunchUrl(Uri.parse(url))) {
+                            await launchUrl(Uri.parse(url));
+                          } else {
+                            throw 'Could not launch $url';
+                          }
+                        },
+                    ),
+                  ),
+                  Padding(padding: EdgeInsets.all(8.0)),
+                  RichText(
+                    text: TextSpan(
+                      text: 'Privacy Policy',
+                      style: TextStyle(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () async {
+                          const url =
+                              "https://stripeinvoice-app-public.s3.amazonaws.com/stripeinvoice-privacy-policy.html";
+                          if (await canLaunchUrl(Uri.parse(url))) {
+                            await launchUrl(Uri.parse(url));
+                          } else {
+                            throw 'Could not launch $url';
+                          }
+                        },
+                    ),
+                  ),
+
                   Padding(padding: EdgeInsets.all(24.0)),
                   SubscriptionList(
                     selectedId: selectedId,
@@ -256,7 +312,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                           });
 
                           final PurchaseParam purchaseParam =
-                          PurchaseParam(productDetails: product);
+                              PurchaseParam(productDetails: product);
                           _inAppPurchase.buyConsumable(
                               purchaseParam: purchaseParam);
                         }
@@ -273,7 +329,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                           backgroundColor: const Color(0xFF29B6F6)),
                     ),
                   ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.2), // Add some bottom padding if needed
+                  SizedBox(
+                      height: MediaQuery.of(context).size.height *
+                          0.2), // Add some bottom padding if needed
                 ],
               ),
             ),
@@ -282,5 +340,4 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       ),
     );
   }
-
 }

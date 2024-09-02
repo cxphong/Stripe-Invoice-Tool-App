@@ -9,7 +9,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:stripe_invoice/apple_store_products.dart';
 import 'package:stripe_invoice/apple_signin.dart';
-import 'package:stripe_invoice/freetrial.dart';
 import 'package:stripe_invoice/launcher.dart';
 import 'package:stripe_invoice/settings.dart';
 import 'package:stripe_invoice/subscription.dart';
@@ -23,7 +22,7 @@ import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_platform_interface/in_app_purchase_platform_interface.dart';
 import 'apps.dart';
 
-void main()  {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
