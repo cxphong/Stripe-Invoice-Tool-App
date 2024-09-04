@@ -245,7 +245,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Text(
-                      "Please select a subscription to access and use all features of the app.",
+                      "A subscription is needed to use this app—no free version is offered. Start with a 7-day trial, cancel anytime.",
                       style: TextStyle(
                         fontFamily: 'Urbanist',
                         fontSize: 18,

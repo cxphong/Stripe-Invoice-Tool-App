@@ -139,17 +139,24 @@ class CreateAccountPage extends StatelessWidget {
                         return;
                       }
 
-                      // Purchased unlimited
-                      if (AppleStoreProductManager().lastTransaction != null &&
+                      if (AppleStoreProductManager().renewalTransaction !=
+                              null &&
                           AppleStoreProductManager()
-                                  .lastTransaction
-                                  ?.productId ==
-                              "unlimited_time") {
+                                  .renewalTransaction!
+                                  .expirationIntent !=
+                              0) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SubscriptionScreen()),
+                        );
+                      } else {
                         if (SharedData().stripe_access_key.isEmpty) {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const StripeConnectPage()),
+                                builder: (context) =>
+                                    const StripeConnectPage()),
                           );
                         } else {
                           Navigator.pushReplacement(
@@ -157,33 +164,6 @@ class CreateAccountPage extends StatelessWidget {
                             MaterialPageRoute(
                                 builder: (context) => const MyHomePage()),
                           );
-                        }
-                      } else {
-                        if (AppleStoreProductManager().renewalTransaction !=
-                                null &&
-                            AppleStoreProductManager()
-                                    .renewalTransaction!
-                                    .expirationIntent !=
-                                0) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const SubscriptionScreen()),
-                          );
-                        } else {
-                          if (SharedData().stripe_access_key.isEmpty) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const StripeConnectPage()),
-                            );
-                          } else {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const MyHomePage()),
-                            );
-                          }
                         }
                       }
                     },

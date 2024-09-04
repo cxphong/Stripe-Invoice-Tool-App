@@ -15,7 +15,6 @@ class AppleStoreProductManager {
   static const List<String> _kIds = [
     'sub_1_month',
     'sub_12_months',
-    'unlimited_subscription',
     'sub_6_months'
   ];
 

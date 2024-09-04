@@ -40,7 +40,7 @@ class _LauncherScreenState extends State<LauncherScreen> {
     await AppleStoreProductManager().loadSubscriptionStatus();
     await DemoManager().checkDemoMode();
 
-    print ("Apple identify = ${SharedData().apple_user_identifier}");
+    print("Apple identify = ${SharedData().apple_user_identifier}");
 
     if (SharedData().apple_user_identifier.isEmpty) {
       Navigator.pushReplacement(
@@ -48,8 +48,8 @@ class _LauncherScreenState extends State<LauncherScreen> {
         MaterialPageRoute(builder: (context) => CreateAccountPage()),
       );
     } else {
-      print (AppleStoreProductManager().lastTransaction);
-      print (AppleStoreProductManager().renewalTransaction);
+      print(AppleStoreProductManager().lastTransaction);
+      print(AppleStoreProductManager().renewalTransaction);
 
       if (AppleStoreProductManager().lastTransaction == null &&
           AppleStoreProductManager().renewalTransaction == null) {
@@ -60,10 +60,14 @@ class _LauncherScreenState extends State<LauncherScreen> {
         return;
       }
 
-      // Purchased unlimited
-      if (AppleStoreProductManager().lastTransaction != null &&
-          AppleStoreProductManager().lastTransaction?.productId ==
-              "unlimited_time") {
+      if (AppleStoreProductManager().renewalTransaction != null &&
+          AppleStoreProductManager().renewalTransaction!.expirationIntent !=
+              0) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => SubscriptionScreen()),
+        );
+      } else {
         if (SharedData().stripe_access_key.isEmpty) {
           Navigator.pushReplacement(
             context,
@@ -74,27 +78,6 @@ class _LauncherScreenState extends State<LauncherScreen> {
             context,
             MaterialPageRoute(builder: (context) => MyHomePage()),
           );
-        }
-      } else {
-        if (AppleStoreProductManager().renewalTransaction != null &&
-            AppleStoreProductManager().renewalTransaction!.expirationIntent !=
-                0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => SubscriptionScreen()),
-          );
-        } else {
-          if (SharedData().stripe_access_key.isEmpty) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => StripeConnectPage()),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => MyHomePage()),
-            );
-          }
         }
       }
     }
