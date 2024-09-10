@@ -35,39 +35,39 @@ class _LauncherScreenState extends State<LauncherScreen> {
   Future<void> initData() async {
     await SharedData().loadStripeAccessKey();
     await SharedData().loadStripePublishableKey();
-    await SharedData().loadAppleUserIdentifier();
-    await AppleStoreProductManager().loadInappPurchase();
-    await AppleStoreProductManager().loadSubscriptionStatus();
+    // await SharedData().loadAppleUserIdentifier();
+    // await AppleStoreProductManager().loadInappPurchase();
+    // await AppleStoreProductManager().loadSubscriptionStatus();
     await DemoManager().checkDemoMode();
 
-    print("Apple identify = ${SharedData().apple_user_identifier}");
+    // print("Apple identify = ${SharedData().apple_user_identifier}");
 
-    if (SharedData().apple_user_identifier.isEmpty) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => CreateAccountPage()),
-      );
-    } else {
-      print(AppleStoreProductManager().lastTransaction);
-      print(AppleStoreProductManager().renewalTransaction);
+    // if (SharedData().apple_user_identifier.isEmpty) {
+    //   Navigator.pushReplacement(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => CreateAccountPage()),
+    //   );
+    // } else {
+    //   print(AppleStoreProductManager().lastTransaction);
+    //   print(AppleStoreProductManager().renewalTransaction);
+    //
+    //   if (AppleStoreProductManager().lastTransaction == null &&
+    //       AppleStoreProductManager().renewalTransaction == null) {
+    //     Navigator.pushReplacement(
+    //       context,
+    //       MaterialPageRoute(builder: (context) => SubscriptionScreen()),
+    //     );
+    //     return;
+    //   }
 
-      if (AppleStoreProductManager().lastTransaction == null &&
-          AppleStoreProductManager().renewalTransaction == null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => SubscriptionScreen()),
-        );
-        return;
-      }
-
-      if (AppleStoreProductManager().renewalTransaction != null &&
-          AppleStoreProductManager().renewalTransaction!.expirationIntent !=
-              0) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => SubscriptionScreen()),
-        );
-      } else {
+      // if (AppleStoreProductManager().renewalTransaction != null &&
+      //     AppleStoreProductManager().renewalTransaction!.expirationIntent !=
+      //         0) {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => SubscriptionScreen()),
+      //   );
+      // } else {
         if (SharedData().stripe_access_key.isEmpty) {
           Navigator.pushReplacement(
             context,
@@ -79,9 +79,9 @@ class _LauncherScreenState extends State<LauncherScreen> {
             MaterialPageRoute(builder: (context) => MyHomePage()),
           );
         }
-      }
+      // }
     }
-  }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +94,7 @@ class _LauncherScreenState extends State<LauncherScreen> {
           children: [
             Spacer(),
             Text(
-              'PaymentGlide',
+              'Invoice Generator',
               style: TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
@@ -104,7 +104,7 @@ class _LauncherScreenState extends State<LauncherScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              'Payments for Stripe',
+              'Invoices & Payments for Stripe',
               style: TextStyle(
                 fontSize: 20,
                 color: Color(0xFF29B6F6),

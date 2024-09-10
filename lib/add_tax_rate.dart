@@ -54,7 +54,7 @@ class _AddTaxRateScreenState extends State<AddTaxRateScreen> {
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: CustomText(text: 'Failed to add tax rate')),
+          SnackBar(content: CustomText(text: 'Failed to add tax rate ' + json.decode(response.body)['error']['message'])),
         );
       }
     }

@@ -108,7 +108,7 @@ class _DetailCustomerScreenState extends State<DetailCustomerScreen> {
         );
         Navigator.pop(context, true); // Return true to indicate success
       } else {
-        print('Failed to update customer. Status code: ${response.statusCode}');
+        // print('Failed to update customer: ${response.statusCode}');
         print('Response body: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

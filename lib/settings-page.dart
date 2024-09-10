@@ -229,34 +229,34 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
                   },
                 ),
-                ListTile(
-                  title: Text(
-                    'Sign Out',
-                    style: TextStyle(fontFamily: 'Urbanist'),
-                  ),
-                  onTap: () async {
-                    await SharedData().clearAppleUserIdentifier();
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                          builder: (context) => CreateAccountPage()),
-                      (Route<dynamic> route) => false,
-                    );
-                  },
-                ),
-                ListTile(
-                  title: Text(
-                    'Delete your account',
-                    style: TextStyle(fontFamily: 'Urbanist', color: Colors.red),
-                  ),
-                  onTap: () async {
-                    await _confirmDeleteAccount();
-                    // await SharedData().clearAppleUserIdentifier();
-                    // Navigator.of(context).pushAndRemoveUntil(
-                    //   MaterialPageRoute(builder: (context) => CreateAccountPage()),
-                    //       (Route<dynamic> route) => false,
-                    // );
-                  },
-                ),
+                // ListTile(
+                //   title: Text(
+                //     'Sign Out',
+                //     style: TextStyle(fontFamily: 'Urbanist'),
+                //   ),
+                //   onTap: () async {
+                //     await SharedData().clearAppleUserIdentifier();
+                //     Navigator.of(context).pushAndRemoveUntil(
+                //       MaterialPageRoute(
+                //           builder: (context) => CreateAccountPage()),
+                //       (Route<dynamic> route) => false,
+                //     );
+                //   },
+                // ),
+                // ListTile(
+                //   title: Text(
+                //     'Delete your account',
+                //     style: TextStyle(fontFamily: 'Urbanist', color: Colors.red),
+                //   ),
+                //   onTap: () async {
+                //     await _confirmDeleteAccount();
+                //     // await SharedData().clearAppleUserIdentifier();
+                //     // Navigator.of(context).pushAndRemoveUntil(
+                //     //   MaterialPageRoute(builder: (context) => CreateAccountPage()),
+                //     //       (Route<dynamic> route) => false,
+                //     // );
+                //   },
+                // ),
               ]),
               buildGroup([
                 ListTile(

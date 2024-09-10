@@ -152,11 +152,13 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
     print(invoiceResponse.body);
     if (invoiceResponse.statusCode != 200) {
       print(invoiceResponse.body);
+      final responseBody = json.decode(invoiceResponse.body);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: CustomText(
                 text:
-                    'Failed to create invoice: ${invoiceResponse.statusCode}')),
+                    'Failed to create invoice: ${responseBody['error']['message']}')),
       );
       return;
     }
@@ -190,7 +192,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
           SnackBar(
               content: CustomText(
                   text:
-                      'Failed to create invoice item: ${response.statusCode}')),
+                      'Failed to create invoice item: ${json.decode(response.body)['error']['message']}')),
         );
         return;
       }

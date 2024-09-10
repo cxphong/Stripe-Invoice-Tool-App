@@ -85,7 +85,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         );
         Navigator.of(context).pop();
       } else {
-        print('Failed to create customer. Status code: ${response.statusCode}');
+        // print('Failed to create customer: ${json.decode(response.body)['error']['message']}');
         print('Response body: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
            SnackBar(

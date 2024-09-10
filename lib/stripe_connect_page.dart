@@ -59,7 +59,7 @@ class _StripeConnectPageState extends State<StripeConnectPage> {
           children: [
             Spacer(),
             Text(
-              'PaymentGlide',
+              'Invoice Generator',
               style: TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
@@ -69,7 +69,7 @@ class _StripeConnectPageState extends State<StripeConnectPage> {
             ),
             SizedBox(height: 10),
             Text(
-              'Payments for Stripe',
+              'Invoices & Payments for Stripe',
               style: TextStyle(
                 fontSize: 20,
                 color: Color(0xFF29B6F6),
