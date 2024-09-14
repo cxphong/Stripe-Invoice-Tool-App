@@ -198,6 +198,33 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
       }
     }
 
+    final invoiceRetrievalResponse = await http.get(
+      Uri.https('api.stripe.com', '/v1/invoices/$invoiceId'),
+      headers: {
+        'Authorization': 'Bearer ${sharedData.stripe_access_key}',
+      },
+    );
+
+    int totalAmount = jsonDecode(invoiceRetrievalResponse.body)['amount_due'];
+    int applicationFeeAmount = (0.004 * totalAmount).round();
+    print ('applicationFeeAmount $applicationFeeAmount');
+
+
+    final invoiceUpdateResponse = await http.post(
+      Uri.https('api.stripe.com', '/v1/invoices/$invoiceId'),
+      headers: {
+        'Authorization': 'Bearer ${sharedData.stripe_access_key}',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Stripe-Account': sharedData.stripe_user_id,
+      },
+      body: {
+        'application_fee_amount': applicationFeeAmount.toString(), // Application fee in cents
+      },
+    );
+
+    print (sharedData.stripe_user_id);
+    print (invoiceUpdateResponse.body);
+
     // Step 3: Finalize Invoice
     final finalizeResponse = await http.post(
       Uri.https('api.stripe.com', '/v1/invoices/$invoiceId/finalize'),

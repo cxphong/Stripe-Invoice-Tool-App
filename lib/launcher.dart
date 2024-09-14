@@ -35,6 +35,7 @@ class _LauncherScreenState extends State<LauncherScreen> {
   Future<void> initData() async {
     await SharedData().loadStripeAccessKey();
     await SharedData().loadStripePublishableKey();
+    await SharedData().loadStripeUserId();
     // await SharedData().loadAppleUserIdentifier();
     // await AppleStoreProductManager().loadInappPurchase();
     // await AppleStoreProductManager().loadSubscriptionStatus();

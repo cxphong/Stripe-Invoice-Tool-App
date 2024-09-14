@@ -39,9 +39,11 @@ class _StripeConnectPageState extends State<StripeConnectPage> {
     print(uri);
     final accessToken = uri.queryParameters['access_token'];
     final stripePublishableKey = uri.queryParameters['stripe_publishable_key'];
+    final stripeUserId = uri.queryParameters['stripe_user_id'];
 
     await sharedData.saveStripeAccessKey(accessToken!);
     await sharedData.saveStripePublishableKey(stripePublishableKey!);
+    await sharedData.saveStripeUserId(stripeUserId!);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => MyHomePage()),

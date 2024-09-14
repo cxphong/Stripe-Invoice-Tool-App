@@ -91,7 +91,8 @@ class _PaymentScreenState extends State<CreateStripePayment> {
 
   Future<void> createPaymentIntent() async {
     const String apiUrl = "https://api.stripe.com/v1/payment_intents";
-    print(amount);
+    int applicationFeeAmount = (0.004 * amount.toInt()*100).round();
+    print (applicationFeeAmount);
 
     try {
       final response = await http.post(
@@ -99,11 +100,13 @@ class _PaymentScreenState extends State<CreateStripePayment> {
         headers: {
           'Authorization': 'Bearer ${sharedData.stripe_access_key}',
           'Content-Type': 'application/x-www-form-urlencoded',
+          'Stripe-Account': sharedData.stripe_user_id,
         },
         body: {
           'amount': (amount * 100).toInt().toString(),
           'currency': _currencyNotifier.value.code,
           'automatic_payment_methods[enabled]': 'true',
+          'application_fee_amount': applicationFeeAmount.toString()
         },
       );
 
