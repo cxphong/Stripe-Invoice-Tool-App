@@ -39,7 +39,7 @@ class _ProductScreenState extends State<ProductScreen> {
     final response = await http.get(
       Uri.https('api.stripe.com', '/v1/products'),
       headers: {
-        'Authorization': 'Bearer sk_test_51O5xFBIhRsa9dgl3u1xnl2lV2mh5L30UFrisv1PNEuGCusEolpPja0YMtmtrASfztwYTj8cM52tFmBbfI2BWoB9g00pHiff5vY'
+        'Authorization': ''
       },
     );
     if (response.statusCode == 200) {

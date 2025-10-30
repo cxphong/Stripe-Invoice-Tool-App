@@ -46,7 +46,7 @@ class _PaymentPageState extends State<PaymentPage> {
         final response = await http.post(
           Uri.parse('https://api.stripe.com/v1/payment_intents'),
           headers: {
-            'Authorization': 'Bearer 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', // Replace with your Stripe secret key
+            'Authorization': '',
             'Content-Type': 'application/x-www-form-urlencoded',
           },
           body: {
