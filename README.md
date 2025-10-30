@@ -1,9 +1,7 @@
-Here’s a README.md template for Invoice payment for Stripe (iOS app) that you can use or adapt for its GitHub repository:
-
 # Invoice Payment for Stripe 📄💳
 
-> A mobile iOS app that enables fast invoice creation, customer & payment management, and seamless Stripe payment integration.  
-> Built for businesses wanting an on-the-go invoicing solution.
+A mobile iOS app that enables fast invoice creation, customer & payment management, and seamless Stripe payment integration.  
+Built for businesses wanting an on-the-go invoicing solution.
 
 [Download on the App Store](https://apps.apple.com/vn/app/invoice-payment-for-stripe/id6529535393?l=vi)
 
@@ -109,16 +107,6 @@ v1.0.1 (Sept 17, 2024)
 	•	Bug fixes.
 	•	Added tax option in settings.
 
-⸻
-
-📞 Support
-
-If you encounter any issues or need help:
-Support email: support@stripeinvoice.app
-Website: https://stripeinvoice.app
-
-⸻
-
 ⚖️ Privacy & Data Policy
 
 The developer states that the app does not collect any user data. For full details, see the Privacy Policy.
@@ -127,16 +115,7 @@ The developer states that the app does not collect any user data. For full detai
 
 🏆 License
 
-Specify your license here (e.g. MIT, Apache 2.0).
-
-Invoice Payment for Stripe – © 2024 CoinsUnion. All rights reserved.
-
-
-⸻
+MIT, Apache 2.0
 
 Thank you for using Invoice Payment for Stripe!
 Let’s make invoicing & payment processing mobile-first, simple and efficient. 🙌
-
----
-
-Feel free to adapt or expand this README (screenshots, architecture diagram, roadmap) based on your repository’s specifics.
