@@ -47,6 +47,7 @@ class DemoManager {
       if (demo) {
         SharedData().saveStripePublishableKey(jsonResponse['stripe_publish_key']);
         SharedData().saveStripeAccessKey(jsonResponse['stripe_secret_key']);
+        SharedData().saveStripeUserId(jsonResponse['stripe_user_id']);
       }
     } else {
       // Handle error response

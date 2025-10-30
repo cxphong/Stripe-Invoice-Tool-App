@@ -31,6 +31,7 @@ class _PaymentScreenState extends State<CreateStripePayment> {
     thousandsSeparator: ',',
     spaceBetweenAmountAndSymbol: false,
   ));
+
   SharedData sharedData = SharedData();
 
   @override

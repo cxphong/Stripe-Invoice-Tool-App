@@ -5,6 +5,7 @@ import 'package:stripe_invoice/create_account_screen.dart';
 import 'package:stripe_invoice/demo_manager.dart';
 import 'package:stripe_invoice/renewal_transaction_screen.dart';
 import 'package:stripe_invoice/stripe_connect_page.dart';
+import 'package:stripe_invoice/taxrate.dart';
 import 'package:stripe_invoice/views/CustomText.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'apple_store_products.dart';
@@ -229,6 +230,20 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
                   },
                 ),
+                ListTile(
+                  title: Text(
+                    'Tax',
+                    style: TextStyle(fontFamily: 'Urbanist'),
+                  ),
+                  onTap: () async {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) => TaxRateScreen()),
+                          // (Route<dynamic> route) => false,
+                    );
+                  },
+                ),
+
                 // ListTile(
                 //   title: Text(
                 //     'Sign Out',
