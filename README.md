@@ -119,15 +119,3 @@ MIT, Apache 2.0
 
 Thank you for using Invoice Payment for Stripe!
 Let’s make invoicing & payment processing mobile-first, simple and efficient. 🙌
-
-## ❤️ Support & Donations
-
-If you find **Invoice Payment for Stripe** helpful and want to support continued development, you can donate directly via crypto:
-
-**Arbitrum (ETH / USDC / ARB):**  
-`0x16f2F798f6921780230DEdF5A84ca72F56e76553`
-
-<img src="https://api.qrserver.com/v1/create-qr-code/?data=0x16f2F798f6921780230DEdF5A84ca72F56e76553&size=200x200" alt="Arbitrum Donation QR" width="200"/>
-
-Your support helps keep the app **free, open-source, and continuously improved** 💪  
-Thank you for supporting innovation in Stripe payments! 🙏
