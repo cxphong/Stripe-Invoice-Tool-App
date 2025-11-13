@@ -1,4 +1,4 @@
-# Invoice Payment for Stripe 📄💳
+# Siro - Invoice Payment for Stripe 📄💳
 
 A mobile iOS app that enables fast invoice creation, customer & payment management, and seamless Stripe payment integration.  
 Built for businesses wanting an on-the-go invoicing solution.
